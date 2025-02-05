@@ -11,6 +11,8 @@ const io = initializeSocket(server);
 
 module.exports = {io};
 
+// new in express
+app.use(express.urlencoded({ extended: true })); // For parsing form data
 
 
 
@@ -18,7 +20,11 @@ require("dotenv").config();
 
 app.use(cors());
 app.use(express.json());
-app.use(express.static("public"));
+// 
+// app.use(express.static("public"));//exactly
+// For serving static files
+const path = require('path');
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // For serving static files
 
@@ -42,43 +48,11 @@ io.engine.on("connection_error", (err) => {
   console.log("Connection Error:", err);
 });
 
-// this is listening for the user connect from the frontend
-// io.on("connection", (socket) => {
-//   console.log("A user connected:", socket.id);
-
-//   socket.on('error', (error) => {
-//     console.error('Socket error:', error);
-//   });
-
-//   // When a user authenticates, store their socket
-//   // and this is emmited from the front end after successfull sign-in
-//   socket.on("register", (userId) => {
-//     activeUsers[userId] = socket.id;
-//     console.log("Registered user:", userId, "Socket ID:", socket.id);
-//   });
-
-//   socket.on("message", (data) => {
-//     console.log("Received:", data);
-//     socket.emit("response", `Server received: ${data}`);
-//   });
-
-//   // Handle disconnection
-//   socket.on("disconnect", () => {
-//     const userId = Object.keys(activeUsers).find(
-//       (key) => activeUsers[key] === socket.id
-//     );
-//     if (userId) {
-//       delete activeUsers[userId];
-//       console.log(`User ${userId} disconnected`);
-//     }
-//   });
-// });
-
 
 async function mongoConnect() {
   try {
     const state = await mongoose.connect(
-      "mongodb://127.0.0.1:27017/sparky_platfrom_db"
+      "mongodb://127.0.0.1:27017/redesign_sparky_db"
     );
     console.log("db connected successfully");
   } catch (error) {
