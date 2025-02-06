@@ -3,30 +3,26 @@ const app = express();
 const mongoose = require("mongoose");
 const cors = require("cors");
 
-
 const http = require("http"); // Required for creating a server
 const server = http.createServer(app);
 const { initializeSocket } = require("./socket/socket");
 const io = initializeSocket(server);
 
-module.exports = {io};
+module.exports = { io };
 
 // new in express
 app.use(express.urlencoded({ extended: true })); // For parsing form data
-
-
 
 require("dotenv").config();
 
 app.use(cors());
 app.use(express.json());
-// 
+//
 // app.use(express.static("public"));//exactly
 // For serving static files
-const path = require('path');
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+const path = require("path");
 
-// For serving static files
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Status route
 app.get("/status", (req, res) => {
@@ -48,7 +44,6 @@ io.engine.on("connection_error", (err) => {
   console.log("Connection Error:", err);
 });
 
-
 async function mongoConnect() {
   try {
     const state = await mongoose.connect(
@@ -60,7 +55,6 @@ async function mongoConnect() {
   }
 }
 mongoConnect();
-
 
 // setup routes
 const user_route = require("./routes/userRoute");

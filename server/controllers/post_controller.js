@@ -1,20 +1,48 @@
 const Post = require("../models/post_model");
 const User = require("../models/user_model");
 const Notification = require("../models/notification_model");
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const { io } = require("../index"); // Import the io instance
 const { emitToUser } = require("../socket/socket");
 
+// multer image uploader setup
+const multer = require("multer");
+const path = require("path");
+
+// Configure multer for post images
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const uploadPath = path.join(__dirname, "../uploads/posts");
+    cb(null, uploadPath);
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    cb(null, "post-" + uniqueSuffix + path.extname(file.originalname));
+  },
+});
+
+exports.postUpload = multer({
+  storage: storage,
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith("image")) {
+      cb(null, true);
+    } else {
+      cb(new Error("Please upload only images."), false);
+    }
+  },
+});
+
 // Create a new post
 exports.createPost = async (req, res) => {
   try {
-    const { content, images } = req.body;
+    const { content } = req.body;
+    const images = req.files ? req.files.map((file) => file.path) : [];
 
     const newPost = new Post({
       content,
       author: req.user.userId,
-      images: images || [],
+      images: images,
     });
 
     const post = await newPost.save();
@@ -38,7 +66,9 @@ exports.getAllPosts = async (req, res) => {
     const skip = (page - 1) * limit;
 
     const posts = await Post.find()
-      .select('content author sparks comments createdAt sparkCount commentCount images')
+      .select(
+        "content author sparks comments createdAt sparkCount commentCount images"
+      )
       .sort({ createdAt: -1 })
       .populate("author", "name profilePicture")
       .skip(skip)
@@ -50,7 +80,7 @@ exports.getAllPosts = async (req, res) => {
       posts,
       currentPage: page,
       totalPages: Math.ceil(total / limit),
-      totalPosts: total
+      totalPosts: total,
     });
   } catch (error) {
     res
@@ -72,20 +102,18 @@ exports.sparkPost = async (req, res) => {
 
     const isSparked = post.sparks.includes(userId);
     const updateOperation = isSparked
-      ? { 
+      ? {
           $pull: { sparks: userId },
-          $inc: { sparkCount: -1 }
+          $inc: { sparkCount: -1 },
         }
       : {
           $addToSet: { sparks: userId },
-          $inc: { sparkCount: 1 }
+          $inc: { sparkCount: 1 },
         };
 
-    const updatedPost = await Post.findByIdAndUpdate(
-      postId,
-      updateOperation,
-      { new: true }
-    ).populate("sparks", "name profilePicture");
+    const updatedPost = await Post.findByIdAndUpdate(postId, updateOperation, {
+      new: true,
+    }).populate("sparks", "name profilePicture");
 
     // Handle notifications
     if (!isSparked) {
@@ -102,7 +130,7 @@ exports.sparkPost = async (req, res) => {
     await Notification.create({
       recipient: post.author,
       sender: userId,
-      type: (isSparked) ? "spark" : "spark",
+      type: isSparked ? "spark" : "spark",
       message: isSparked ? "unSparked successfully" : "Sparked successfully",
       target: postId,
       targetModel: "Post",
@@ -111,10 +139,12 @@ exports.sparkPost = async (req, res) => {
     res.json({
       message: isSparked ? "unSparked successfully" : "Sparked successfully",
       sparkCount: updatedPost.sparkCount,
-      sparks: updatedPost.sparks
+      sparks: updatedPost.sparks,
     });
   } catch (error) {
-    res.status(400).json({ message: "Error updating spark", error: error.message });
+    res
+      .status(400)
+      .json({ message: "Error updating spark", error: error.message });
   }
 };
 
@@ -127,14 +157,14 @@ exports.addComment = async (req, res) => {
     const updatedPost = await Post.findByIdAndUpdate(
       req.params.id,
       {
-        $push: { 
+        $push: {
           comments: {
             user: userId,
             content,
-            createdAt: new Date()
-          }
+            createdAt: new Date(),
+          },
         },
-        $inc: { commentCount: 1 }
+        $inc: { commentCount: 1 },
       },
       { new: true }
     );
@@ -163,10 +193,12 @@ exports.addComment = async (req, res) => {
 
     res.json({
       message: "Comment added successfully",
-      commentCount: updatedPost.commentCount
+      commentCount: updatedPost.commentCount,
     });
   } catch (error) {
-    res.status(400).json({ message: "Error adding comment", error: error.message });
+    res
+      .status(400)
+      .json({ message: "Error adding comment", error: error.message });
   }
 };
 
@@ -196,19 +228,22 @@ exports.getPostById = async (req, res) => {
 // New function to get post counts
 exports.getPostCounts = async (req, res) => {
   try {
-    const post = await Post.findById(req.params.id)
-      .select('sparkCount commentCount');
-    
+    const post = await Post.findById(req.params.id).select(
+      "sparkCount commentCount"
+    );
+
     if (!post) {
       return res.status(404).json({ message: "Post not found" });
     }
-    
+
     res.json({
       sparkCount: post.sparkCount,
-      commentCount: post.commentCount
+      commentCount: post.commentCount,
     });
   } catch (error) {
-    res.status(500).json({ message: "Error fetching counts", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error fetching counts", error: error.message });
   }
 };
 
@@ -217,37 +252,43 @@ exports.getUserPostStats = async (req, res) => {
   try {
     const userId = req.params.userId;
     const stats = await Post.aggregate([
-      { 
-        $match: { // Filter by author
-          author: new mongoose.Types.ObjectId(userId) 
-        }
+      {
+        $match: {
+          // Filter by author
+          author: new mongoose.Types.ObjectId(userId),
+        },
       },
       {
-        $group: {// Group by author
-          _id: '$author',  // Group by author instead of null
-          totalPosts: { $sum: 1 },// Count the number of posts
-          totalSparks: { $sum: '$sparkCount' },
-          totalComments: { $sum: '$commentCount' }
-        }
+        $group: {
+          // Group by author
+          _id: "$author", // Group by author instead of null
+          totalPosts: { $sum: 1 }, // Count the number of posts
+          totalSparks: { $sum: "$sparkCount" },
+          totalComments: { $sum: "$commentCount" },
+        },
       },
       {
         $project: {
-          _id: 0,          // Exclude _id from result
-          userId: '$_id',  // Rename _id to userId
+          _id: 0, // Exclude _id from result
+          userId: "$_id", // Rename _id to userId
           totalPosts: 1,
           totalSparks: 1,
-          totalComments: 1
-        }
-      }
+          totalComments: 1,
+        },
+      },
     ]);
-    
-    res.json(stats[0] || { 
-      userId: userId,
-      totalPosts: 0, 
-      totalSparks: 0, 
-      totalComments: 0 
-    });
+
+    res.json(
+      stats[0] || {
+        userId: userId,
+        totalPosts: 0,
+        totalSparks: 0,
+        totalComments: 0,
+      }
+    );
   } catch (error) {
-    res.status(500).json({ message: "Error fetching stats", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error fetching stats", error: error.message });
   }
 };
