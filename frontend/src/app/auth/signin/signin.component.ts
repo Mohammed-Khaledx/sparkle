@@ -21,27 +21,27 @@ export class SigninComponent {
   authService = inject(AuthService);
   router = inject(Router);
 
-
   protected loginForm = new FormGroup({
     email: new FormControl('', [Validators.required, Validators.email]),
-    password: new FormControl('', [Validators.required])
-  })
+    password: new FormControl('', [Validators.required]),
+  });
 
-
-  onSubmit(){
-    if(this.loginForm.valid){
+  onSubmit() {
+    if (this.loginForm.valid) {
       console.log(this.loginForm.value);
-      this.authService.login(this.loginForm.value)
-      .subscribe((data: any) => {
-        if(this.authService.isLoggedIn()){
-          // should navigate to admin if isAdmin == true  
-          // and if not navigate to home page
-          
-          this.router.navigate(['/admin']);
-        }
-        console.log(data);
-      });
+      this.authService
+        .login(this.loginForm.value)
+
+        .subscribe((data: any) => {
+          // isLogged in check if has token or not
+          if (this.authService.isLoggedIn()) {
+            // should navigate to admin if isAdmin == true
+            // and if not navigate to home page
+            this.router.navigate(['/feed']); // Redirect to feed after login
+          }
+
+          console.log(data);
+        });
     }
   }
-
 }

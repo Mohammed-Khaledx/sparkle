@@ -1,0 +1,12 @@
+<nav class="navbar">
+    <div class="logo">
+      <a routerLink="/">⚡ Sparky</a>
+    </div>
+    <ul class="nav-links">
+      <li><a routerLink="/feed">Feed</a></li>
+      <li *ngIf="isLoggedIn()"> <a routerLink="/profile">Profile</a></li>
+      <li *ngIf="!isLoggedIn()"> <a routerLink="/signin">Login</a></li>
+      <li *ngIf="!isLoggedIn()"> <a routerLink="/signup">Sign Up</a></li>
+      <li *ngIf="isLoggedIn()"> <button (click)="logout()">Logout</button></li>
+    </ul>
+  </nav>

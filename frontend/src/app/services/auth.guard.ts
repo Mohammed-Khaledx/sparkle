@@ -1,5 +1,7 @@
-import { CanActivateFn } from '@angular/router';
+// gaurd for checking if the user is logged in or not
 
+
+import { CanActivateFn } from '@angular/router';
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from './auth.service';
@@ -12,6 +14,6 @@ export const authGuard: CanActivateFn = (route, state) => {
   if (authService.isLoggedIn()) {
     return true;
   }
-  router.navigate(['/login']);
+  router.navigate(['/signin']);
   return false;
 };

@@ -23,21 +23,21 @@ export class SignupComponent {
   public signupForm = new FormGroup({
     name: new FormControl('', [Validators.required]),
     email: new FormControl('', [Validators.required, Validators.email]),
-    password: new FormControl('', [Validators.required])
-  })
+    password: new FormControl('', [Validators.required]),
+  });
 
   public onSubmit() {
     if (this.signupForm.valid) {
       console.log(this.signupForm.value);
-      this.authService.signup(this.signupForm.value)
-        .subscribe({
-          next: (data: any) => {
-            // this data is the response from the backend server
-            console.log(data);
-            this.router.navigate(['/signin']);
-          },
-          error: (err) => console.log(err)
-        });
+      this.authService.signup(this.signupForm.value).subscribe({
+        next: (data: any) => {
+          // this data is the response from the backend server
+          // and it has a token
+          console.log(data);
+          this.router.navigate(['/signin']);
+        },
+        error: (err) => console.log(err),
+      });
     }
   }
 }

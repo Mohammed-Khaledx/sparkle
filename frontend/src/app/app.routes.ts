@@ -13,5 +13,11 @@ export const routes: Routes = [
     component: AdminComponent,
     canActivate: [authGuard],
   },
+  {
+    path: 'feed',
+    component: AdminComponent,
+    canActivate: [authGuard],
+  },
   { path: '', redirectTo: '/signin', pathMatch: 'full' },
+  { path: '**', redirectTo: '/feed' }
 ];
