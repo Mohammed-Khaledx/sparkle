@@ -13,4 +13,12 @@ const followSchema = new mongoose.Schema({
 // but if index it could access it directlt 
 followSchema.index({ follower: 1, following: 1 }, { unique: true });
 
+
+
+// // This function will return an array of user IDs that the given userId follows
+// FollowSchema.statics.getFollowedUserIds = async function (userId) {
+//   const followedUsers = await this.find({ follower: userId }).select("following");
+//   return followedUsers.map(follow => follow.following);
+// };
+
 module.exports = mongoose.model("Follow", followSchema);

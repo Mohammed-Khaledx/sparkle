@@ -6,6 +6,10 @@
 const User = require("../models/user_model");
 const Follow = require("../models/follow_model");
 
+
+
+
+
 // for uplaod images
 const multer = require("multer");
 const path = require("path");
@@ -42,18 +46,19 @@ const upload = multer({
   },
 });
 
+
 // CREATE
-// this is replaced in register route
-// let createUser = async (req, res) => {
-//   try {
-//     const user = new User(req.body);
-//     const newUser = user.save(user);
-//     res.status(201).json(newUser);
-//     console.log("user created OK!");
-//   } catch (error) {
-//     res.status(400).json({ message: error.message });
-//   }
-// };
+// replaced by register
+let createUser = async (req, res) => {
+  // try {
+  //   const user = new User(req.body);
+  //   const newUser = user.save(user);
+  //   res.status(201).json(newUser);
+  //   console.log("user created OK!");
+  // } catch (error) {
+  //   res.status(400).json({ message: error.message });
+  // }
+};
 
 // READ
 let getAllUsers = async (req, res) => {
@@ -100,6 +105,7 @@ let getUserById = async (req, res) => {
     const followersCount = await Follow.countDocuments({ following: id });
     const followingCount = await Follow.countDocuments({ follower: id });
 
+
     res.status(200).json({
       user,
       followersCount,
@@ -132,6 +138,7 @@ let updateUser = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
 
 // update profile picture
 const updateProfilePicture = async (req, res) => {
@@ -177,7 +184,7 @@ let deleteUser = async (req, res) => {
 };
 
 module.exports = {
-  // createUser,
+  createUser,
   getAllUsers,
   getUserById,
   updateUser,

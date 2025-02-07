@@ -1,10 +1,11 @@
 const express = require("express");
 const router = express.Router();
 const auth = require("../middlewares/auth");
-
-const {postUpload,
+const {
+  postUpload,
   createPost,
   getAllPosts,
+  getFeedPosts, // Add this
   sparkPost,
   addComment,
   getPostById,
@@ -12,7 +13,10 @@ const {postUpload,
   getUserPostStats,
 } = require("../controllers/post_controller");
 
-router.post("/", auth,  postUpload.array('images', 5),  createPost);
+//get the home page posts 
+router.get("/feed", auth, getFeedPosts);
+
+router.post("/", auth, postUpload.array("images", 5), createPost);
 router.get("/", auth, getAllPosts);
 
 // to get a post or view it you might not be sign in

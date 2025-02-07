@@ -42,6 +42,8 @@ const PostSchema = new mongoose.Schema({
   }
 }, { timestamps: true });
 
+PostSchema.index({ author: 1, createdAt: -1 });
+
 // Add middleware to auto-update counts
 PostSchema.pre('save', function(next) {
   if (this.isModified('sparks')) {
