@@ -1,7 +1,9 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FeedService ,Post} from '../../services/feed.service';
-import { CommentComponent } from '../../comment/comment.component';
+import { CommentComponent } from '../../components/comment/comment.component';
+import { NotificationService } from '../../services/notification.service';
+
 @Component({
   selector: 'app-feed',
   standalone: true,
@@ -15,6 +17,7 @@ export class FeedComponent implements OnInit {
   sparkedPostsMap = signal<{[key: string]: boolean}>({});
 
   feedService = inject(FeedService);
+  private notificationService = inject(NotificationService);
 
   currentPage = 1;
   loading = signal(false);
@@ -86,6 +89,9 @@ export class FeedComponent implements OnInit {
               : post
           )
         );
+
+        // Listen for the notification
+        this.notificationService.getNotifications().subscribe();
       },
       error: (err) => console.error("Error toggling spark:", err)
     });

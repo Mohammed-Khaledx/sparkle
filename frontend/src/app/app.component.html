@@ -1,5 +1,11 @@
 <app-navbar></app-navbar>
-<!-- <app-explore></app-explore> -->
- <!-- <app-home-page></app-home-page> -->
-<router-outlet></router-outlet>
 
+<div class="page-layout">
+  <!-- Only show sidebar if not on auth pages -->
+  <app-sidebar ></app-sidebar>
+  
+  <!-- Main content area -->
+  <main class="main-content" [class.full-width]="!showSidebar()">
+    <router-outlet></router-outlet>
+  </main>
+</div>
