@@ -1,0 +1,23 @@
+<div class="comments-container">
+  <div class="comments-list">
+    <div *ngFor="let comment of comments()" class="comment">
+      <div class="comment-header">
+        <strong>{{ comment.user.name }}</strong>
+        <span class="comment-date">{{ comment.createdAt | date:'short' }}</span>
+      </div>
+      <p class="comment-content">{{ comment.content }}</p>
+    </div>
+  </div>
+
+  <div class="comment-form">
+    <input 
+      [ngModel]="newComment()"
+      (ngModelChange)="newComment.set($event)"
+      placeholder="Write a comment..."
+      (keyup.enter)="addComment()"
+    />
+    <button (click)="addComment()" [disabled]="!newComment().trim()">
+      Post
+    </button>
+  </div>
+</div>
