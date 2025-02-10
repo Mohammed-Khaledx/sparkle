@@ -154,6 +154,13 @@ exports.addComment = async (req, res) => {
     const { content } = req.body;
     const userId = req.user.userId;
 
+    const post = await Post.findById(req.params.id)
+      .populate('author', 'name profilePicture');
+    
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+
     const updatedPost = await Post.findByIdAndUpdate(
       req.params.id,
       {
@@ -170,6 +177,32 @@ exports.addComment = async (req, res) => {
     ).populate('comments.user', 'name profilePicture');
 
     const newComment = updatedPost.comments[updatedPost.comments.length - 1];
+
+    // Always create notification regardless of user's online status
+    if (post.author._id.toString() !== userId) {
+      const { name } = await User.findById(userId);
+      
+      // Create notification in database first
+      await Notification.create({
+        recipient: post.author._id,
+        sender: userId,
+        type: 'comment',
+        message: 'commented on your post',
+        target: post._id,
+        targetModel: 'Post'
+      });
+
+      // Attempt real-time delivery
+      emitToUser(
+        post.author._id.toString(),
+        "notification",
+        {
+          type: 'comment',
+          message: `${name} commented on your post`,
+          postId: post._id
+        }
+      );
+    }
 
     res.json({
       message: "Comment added successfully",

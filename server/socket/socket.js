@@ -76,15 +76,17 @@ function initializeSocket(httpServer) {
 // Emit a notification to a specific user and handle all his devices
 
 const emitToUser = (userId, event, data) => {
-  // console.log(userId,event,data)
   const sockets = getUserSockets(userId);
-  if (sockets.length > 0) {
-    // more than one device
-    sockets.forEach((socketid) => {
-      io.to(socketid).emit(event, data);
+  if (sockets && sockets.length > 0) {
+    // User is online, send to all their devices
+    sockets.forEach((socketId) => {
+      io.to(socketId).emit(event, data);
     });
+    return true;
   } else {
-    console.log(`User ${userId} is offline. Event not delivered.`);
+    // User is offline - notification is still stored in DB
+    console.log(`User ${userId} is offline. Notification saved in database.`);
+    return false;
   }
 };
 

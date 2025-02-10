@@ -2,10 +2,11 @@ import { Component, Input, OnInit, Output, EventEmitter, inject, signal } from '
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
-import { Comment } from '../services/feed.service';
+import { Comment } from '../../services/feed.service';
 import { CommonModule } from '@angular/common';
-import { FeedService } from '../services/feed.service';
-import { FeedComponent } from '../pages/feed/feed.component';
+import { FeedService } from '../../services/feed.service';
+import { FeedComponent } from '../../pages/feed/feed.component';
+import { NotificationService } from '../../services/notification.service';
 
 @Component({
   selector: 'app-comment',
@@ -19,6 +20,7 @@ export class CommentComponent implements OnInit {
   @Output() commentCountChanged = new EventEmitter<number>();
   
   private feedService = inject(FeedService);
+  private notificationService = inject(NotificationService);
   comments = signal<Comment[]>([]);
   newComment = signal('');
 
@@ -53,6 +55,9 @@ export class CommentComponent implements OnInit {
         
         // Emit the new comment count
         this.commentCountChanged.emit(response.commentCount);
+
+        // The notification will be handled by the socket connection
+        // No need to call getNotifications() here as the socket will handle it
       },
       error: (err) => console.error('Error adding comment:', err)
     });
