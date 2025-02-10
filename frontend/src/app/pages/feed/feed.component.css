@@ -1,0 +1,15 @@
+/* 
+.spark-button.sparked {
+    background-color: #ffd700;
+    color: #000;
+  } */
+
+  .spark-button {
+    transition: all 0.3s ease;
+  }
+  
+  .spark-button.sparked {
+    background-color: #ffd700;
+    color: #000;
+    transform: scale(1.05);
+  }

@@ -1,0 +1,13 @@
+<div class="comments-container">
+  <h3>💬 Comments</h3>
+
+  <div *ngFor="let comment of comments()">
+    <p>
+      <strong>{{ comment.userId }}</strong
+      >: {{ comment.content }}
+    </p>
+  </div>
+
+  <input [(ngModel)]="newComment" placeholder="Write a comment..." />
+  <button (click)="addComment()">Post</button>
+</div>
