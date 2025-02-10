@@ -23,6 +23,23 @@ interface SparkResponse {
   sparks: string[];
 }
 
+export interface Comment {
+  _id: string;
+  content: string;
+  user: {
+    _id: string;
+    name: string;
+    profilePicture?: string;
+  };
+  createdAt: string;
+}
+
+interface CommentResponse {
+  message: string;
+  comment: Comment;
+  commentCount: number;
+}
+
 interface FeedResponse {
   posts: Post[];
   currentPage: number;
@@ -50,22 +67,18 @@ export class FeedService {
     );
   }
 
-  getComments(postId: string): Observable<any> {
-    return this.httpClient.get<any>(`${this.apiUrl}/${postId}/comments`, {
-      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
-    });
-  }
-
-  addComment(postId: string, text: string): Observable<any> {
-    return this.httpClient.post<any>(
-      `${this.apiUrl}/${postId}/comments`,
-      { text },
-      {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
-      }
+  getComments(postId: string): Observable<{ comments: Comment[] }> {
+    return this.httpClient.get<{ comments: Comment[] }>(
+      `${this.apiUrl}/${postId}/comments`
     );
   }
 
+  addComment(postId: string, text: string): Observable<CommentResponse> {
+    return this.httpClient.post<CommentResponse>(
+      `${this.apiUrl}/comment/${postId}`,
+      { content: text }
+    );
+  }
   getPostCounts(
     postId: string
   ): Observable<{ sparkCount: number; commentCount: number }> {

@@ -12,9 +12,14 @@
     ⚡ {{ postCounts()[post._id] || post.sparkCount || 0 }}
   </button>
     
-    <button (click)="openComments(post._id)">
-      💬 {{ post.comments.length }} Comments
-    </button>
+  <button (click)="openComments(post._id)">
+    💬 {{ post.commentCount }} Comments
+  </button>
+  <app-comment 
+  *ngIf="selectedPostId() === post._id" 
+  [postId]="post._id"
+  (commentCountChanged)="updatePostCommentCount(post._id, $event)">
+</app-comment>
   </div>
   
   <button *ngIf="hasMore()" (click)="loadFeed()" [disabled]="loading()">

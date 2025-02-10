@@ -1,13 +1,23 @@
 <div class="comments-container">
-  <h3>💬 Comments</h3>
-
-  <div *ngFor="let comment of comments()">
-    <p>
-      <strong>{{ comment.userId }}</strong
-      >: {{ comment.content }}
-    </p>
+  <div class="comments-list">
+    <div *ngFor="let comment of comments()" class="comment">
+      <div class="comment-header">
+        <strong>{{ comment.user.name }}</strong>
+        <span class="comment-date">{{ comment.createdAt | date:'short' }}</span>
+      </div>
+      <p class="comment-content">{{ comment.content }}</p>
+    </div>
   </div>
 
-  <input [(ngModel)]="newComment" placeholder="Write a comment..." />
-  <button (click)="addComment()">Post</button>
+  <div class="comment-form">
+    <input 
+      [ngModel]="newComment()"
+      (ngModelChange)="newComment.set($event)"
+      placeholder="Write a comment..."
+      (keyup.enter)="addComment()"
+    />
+    <button (click)="addComment()" [disabled]="!newComment().trim()">
+      Post
+    </button>
+  </div>
 </div>

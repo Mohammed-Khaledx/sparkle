@@ -167,38 +167,36 @@ exports.addComment = async (req, res) => {
         $inc: { commentCount: 1 },
       },
       { new: true }
-    );
+    ).populate('comments.user', 'name profilePicture');
 
-    if (!updatedPost) {
-      return res.status(404).json({ message: "Post not found" });
-    }
-
-    // Create notification
-    await Notification.create({
-      recipient: updatedPost.author,
-      sender: userId,
-      type: "comment",
-      message: "commented on your post",
-      target: updatedPost._id,
-      targetModel: "Post",
-    });
-
-    const { name } = await User.findById(userId);
-    emitToUser(
-      updatedPost.author.toJSON(),
-      "notification",
-      name + " commented on your post",
-      io
-    );
+    const newComment = updatedPost.comments[updatedPost.comments.length - 1];
 
     res.json({
       message: "Comment added successfully",
-      commentCount: updatedPost.commentCount,
+      comment: newComment,
+      commentCount: updatedPost.commentCount
     });
   } catch (error) {
-    res
-      .status(400)
-      .json({ message: "Error adding comment", error: error.message });
+    res.status(400).json({ message: "Error adding comment", error: error.message });
+  }
+};
+
+exports.getPostComments = async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.id)
+      .select('comments')
+      .populate({
+        path: 'comments.user',
+        select: 'name profilePicture'
+      });
+      
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+
+    res.json({ comments: post.comments });
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching comments", error: error.message });
   }
 };
 

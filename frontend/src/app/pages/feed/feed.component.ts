@@ -98,7 +98,9 @@ export class FeedComponent implements OnInit {
     return this.sparkedPostsMap()[postId] ?? false;
   }
   openComments(postId: string) {
-    this.selectedPostId.set(postId);
+    this.selectedPostId.update(current => 
+      current === postId ? null : postId
+    );
   }
 
   loadPostCounts(postId: string) {
@@ -110,6 +112,15 @@ export class FeedComponent implements OnInit {
     });
   }
 
+  updatePostCommentCount(postId: string, newCount: number) {
+    this.posts.update(posts =>
+      posts.map(post =>
+        post._id === postId
+          ? { ...post, commentCount: newCount, comments: [...post.comments, newCount] }
+          : post
+      )
+    );
+  }
   private getUserIdFromToken(): string | null {
     const token = localStorage.getItem('token');
     if (!token) return null;

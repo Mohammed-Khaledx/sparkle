@@ -1,15 +1,99 @@
-/* 
-.spark-button.sparked {
-    background-color: #ffd700;
-    color: #000;
-  } */
+.feed-container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+}
 
-  .spark-button {
-    transition: all 0.3s ease;
+h2 {
+  text-align: center;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.post-card {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.post-card p {
+  margin: 10px 0;
+}
+
+.post-card strong {
+  color: #333;
+  font-size: 1.1em;
+}
+
+.post-card button {
+  background: #f0f0f0;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 20px;
+  cursor: pointer;
+  margin-right: 10px;
+  transition: all 0.3s ease;
+}
+
+.post-card button:hover {
+  background: #e0e0e0;
+}
+
+.spark-button {
+  color: #666;
+}
+
+.spark-button.sparked {
+  background-color: #ffd700 !important;
+  color: #000;
+  transform: scale(1.05);
+}
+
+/* Load More Button */
+.feed-container > button {
+  display: block;
+  width: 200px;
+  margin: 20px auto;
+  padding: 10px 20px;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.feed-container > button:hover:not([disabled]) {
+  background: #0056b3;
+}
+
+.feed-container > button:disabled {
+  background: #cccccc;
+  cursor: not-allowed;
+}
+
+/* Comments Section Styling */
+app-comment {
+  margin-top: 15px;
+  border-top: 1px solid #eee;
+  padding-top: 15px;
+  display: block;
+}
+
+/* Animation for comments opening/closing */
+app-comment {
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
   }
-  
-  .spark-button.sparked {
-    background-color: #ffd700;
-    color: #000;
-    transform: scale(1.05);
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
+}
