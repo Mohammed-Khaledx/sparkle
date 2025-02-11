@@ -17,24 +17,32 @@ const { emitToUser } = require("../socket/socket");
 const sendMessage = async (req, res) => {
   try {
     const { receiver, content } = req.body;
-    const sender = req.user.userId; // Extract from JWT
+    const sender = req.user.userId;
 
     if (!receiver || !content) {
-      return res
-        .status(400)
-        .json({ error: "Receiver ID and message are required" });
+      return res.status(400).json({ 
+        error: "Receiver ID and message content are required" 
+      });
     }
 
-    // Save message to database
-    const newMessage = await Message.create({ sender, receiver, content });
-    // getting reciver name from user table and attaching it to the message content 
-    // const user = await User.findById(sender);
+    // Create and populate the new message
+    const newMessage = await Message.create({ 
+      sender, 
+      receiver, 
+      content 
+    });
 
-    emitToUser(receiver, "message",  content, io);
-    return res.status(201).json(newMessage);
+    // Populate sender and receiver details
+    const populatedMessage = await Message.findById(newMessage._id)
+      .populate('sender', 'name profilePicture')
+      .populate('receiver', 'name profilePicture');
 
+    // Emit real-time notification
+    emitToUser(receiver, "message", populatedMessage, io);
+    
+    return res.status(201).json(populatedMessage);
   } catch (error) {
-    res.status(500).json({ error: "Failed to send message"+ error });
+    res.status(500).json({ error: "Failed to send message: " + error });
   }
 };
 
@@ -57,6 +65,25 @@ const getMessages = async (req, res) => {
     res.status(200).json(messages);
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch messages" });
+  }
+};
+
+const getRecentMessages = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+
+    // Get recent messages for the user
+    const messages = await Message.find({
+      $or: [{ sender: userId }, { receiver: userId }]
+    })
+    .sort({ createdAt: -1 })
+    .limit(20)
+    .populate('sender', 'name profilePicture')
+    .populate('receiver', 'name profilePicture');
+
+    res.status(200).json({ messages });
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch recent messages" });
   }
 };
 
@@ -88,5 +115,5 @@ const getMessages = async (req, res) => {
 module.exports = {
   sendMessage,
   getMessages,
-  // markMessagesAsSeen
+  getRecentMessages
 };

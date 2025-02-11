@@ -1,0 +1,30 @@
+config:
+  target: "http://localhost:3000"
+  phases:
+    - duration: 30
+      arrivalRate: 5
+      rampTo: 15
+      name: "Warm up phase"
+    - duration: 60
+      arrivalRate: 15
+      name: "Sustained load"
+  processor: "./load-test-functions.js"
+
+scenarios:
+  - name: "User registration, posting, and following flow"
+    flow:
+      # Register user
+      - function: "generateUser"
+      - post:
+          url: "/users/register"
+          json:
+            name: "{{ name }}"
+            email: "{{ email }}"
+            password: "{{ password }}"
+          capture:
+            - json: "$.token"
+              as: "authToken"
+            - json: "$.user._id"
+              as: "userId"
+          expect:
+            - statusCode: 201

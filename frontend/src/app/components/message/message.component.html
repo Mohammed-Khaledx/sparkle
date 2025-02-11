@@ -1,12 +1,27 @@
 <div class="messages-container">
   <div class="contacts-list">
-    <h3>Following</h3>
-    <div *ngFor="let user of followedUsers()" 
-         class="contact-item"
-         [class.active]="selectedUser()?._id === user.following._id"
-         (click)="selectUser(user.following)">
-      <img [src]="user.following.profilePicture || 'assets/default-avatar.png'" alt="Avatar">
-      <span>{{ user.following.name }}</span>
+    <!-- Recent Messages Section -->
+    <div class="section">
+      <h3>Recent Messages</h3>
+      <div *ngFor="let user of recentMessageUsers()" 
+           class="contact-item"
+           [class.active]="selectedUser()?._id === user._id"
+           (click)="selectUser(user)">
+        <img [src]="user.profilePicture || 'assets/default-avatar.png'" alt="Avatar">
+        <span>{{ user.name }}</span>
+      </div>
+    </div>
+
+    <!-- Following Section -->
+    <div class="section">
+      <h3>Following</h3>
+      <div *ngFor="let user of followedUsers()" 
+           class="contact-item"
+           [class.active]="selectedUser()?._id === user.following._id"
+           (click)="selectUser(user.following)">
+        <img [src]="user.following.profilePicture || 'assets/default-avatar.png'" alt="Avatar">
+        <span>{{ user.following.name }}</span>
+      </div>
     </div>
   </div>
 

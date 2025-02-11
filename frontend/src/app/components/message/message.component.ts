@@ -5,7 +5,6 @@ import { FormsModule } from '@angular/forms';
 import { MessageService } from '../../services/message.service';
 import { HttpClient } from '@angular/common/http';
 
-
 interface User {
   _id: string;
   name: string;
@@ -14,6 +13,14 @@ interface User {
 
 interface FollowedUser {
   following: User;
+}
+interface Message {
+  _id: string;
+  sender: User;
+  receiver: User;
+  content: string;
+  createdAt: string;
+  read: boolean;
 }
 
 @Component({
@@ -28,29 +35,64 @@ export class MessageComponent implements OnInit {
   private http = inject(HttpClient);
 
   followedUsers = signal<FollowedUser[]>([]);
+  recentMessageUsers = signal<User[]>([]);
   selectedUser = signal<User | null>(null);
-  messages = signal<any[]>([]);
-  newMessage = signal('');
+  messages = signal<Message[]>([]); // Type the messages array
   currentUserId = this.getUserIdFromToken();
+  newMessage = ''; // Regular string property for ngModel
 
   ngOnInit() {
     this.loadFollowedUsers();
+    this.loadRecentMessages();
     
-    // Listen for new messages
     this.messageService.getNewMessages().subscribe(message => {
-      this.messages.update(msgs => [...msgs, message]);
+      if (this.selectedUser()?._id === message.sender._id || 
+          this.selectedUser()?._id === message.receiver._id) {
+        this.messages.update(msgs => [...msgs, message]);
+      }
+      
+      if (message.sender._id !== this.currentUserId) {
+        this.addToRecentUsers(message.sender);
+      }
+    });
+  }
+
+  loadRecentMessages() {
+    this.messageService.getRecentMessages().subscribe({
+      next: (response) => {
+        const recentUsers = response.messages
+          .map(msg => msg.sender._id === this.currentUserId ? msg.receiver : msg.sender)
+          .filter((user, index, self) => 
+            index === self.findIndex(u => u._id === user._id)
+          );
+        this.recentMessageUsers.set(recentUsers);
+      },
+      error: (err) => console.error('Error loading recent messages:', err)
+    });
+  }
+
+  private addToRecentUsers(user: User) {
+    this.recentMessageUsers.update(users => {
+      const exists = users.some(u => u._id === user._id);
+      if (!exists) {
+        return [user, ...users];
+      }
+      return users;
     });
   }
 
   loadFollowedUsers() {
-    this.http.get<{ data: FollowedUser[] }>(`http://localhost:3000/followOrUnfollow/${this.currentUserId}?type=following`)
-      .subscribe({
-        next: (response) => {
-          
-          this.followedUsers.set(response.data);
-        },
-        error: (err) => console.error('Error loading followed users:', err)
-      });
+    const userId = this.currentUserId;
+    if (!userId) return;
+    
+    this.http.get<{ data: FollowedUser[] }>(
+      `http://localhost:3000/followOrUnfollow/${userId}?type=following`
+    ).subscribe({
+      next: (response) => {
+        this.followedUsers.set(response.data);
+      },
+      error: (err) => console.error('Error loading followed users:', err)
+    });
   }
 
   selectUser(user: User) {
@@ -68,12 +110,16 @@ export class MessageComponent implements OnInit {
   }
 
   sendMessage() {
-    if (!this.newMessage().trim() || !this.selectedUser()) return;
+    if (!this.newMessage.trim() || !this.selectedUser()) return;
 
-    this.messageService.sendMessage(this.selectedUser()?._id!, this.newMessage()).subscribe({
+    this.messageService.sendMessage(
+      this.selectedUser()?._id!, 
+      this.newMessage
+    ).subscribe({
       next: (message) => {
         this.messages.update(msgs => [...msgs, message]);
-        this.newMessage.set('');
+        this.newMessage = ''; // Clear the input
+        this.addToRecentUsers(this.selectedUser()!);
       },
       error: (err) => console.error('Error sending message:', err)
     });

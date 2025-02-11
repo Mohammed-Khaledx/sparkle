@@ -26,7 +26,7 @@ interface Message {
 })
 export class MessageService {
   private http = inject(HttpClient);
-  private apiUrl = 'http://localhost:3000/messages';
+  readonly apiUrl = 'http://localhost:3000/messages'; // Make this readonly
   private messageSubject = new Subject<Message>();
   private socket: Socket;
 
@@ -40,15 +40,19 @@ export class MessageService {
     });
   }
 
-  sendMessage(receiverId: string, content: string): Observable<Message> {
-    return this.http.post<Message>(`${this.apiUrl}`, { receiver: receiverId, content });
-  }
-
-  getMessages(otherUserId: string): Observable<Message[]> {
-    return this.http.get<Message[]>(`${this.apiUrl}/${otherUserId}`);
+  getRecentMessages(): Observable<{ messages: Message[] }> {
+    return this.http.get<{ messages: Message[] }>(`${this.apiUrl}/recent`);
   }
 
   getNewMessages(): Observable<Message> {
     return this.messageSubject.asObservable();
+  }
+
+  sendMessage(receiverId: string, content: string): Observable<Message> {
+    return this.http.post<Message>(this.apiUrl, { receiver: receiverId, content });
+  }
+
+  getMessages(otherUserId: string): Observable<Message[]> {
+    return this.http.get<Message[]>(`${this.apiUrl}/${otherUserId}`);
   }
 }
