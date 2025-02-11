@@ -32,7 +32,8 @@
     color: white;
   }
 
-  .notification-badge {
+  .notification-badge,
+  .message-badge {
     position: absolute;
     top: -8px;
     right: -8px;
@@ -46,9 +47,11 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    border: 2px solid white;
   }
   
-  .notification-link {
+  .notification-link,
+  .message-link {
     position: relative;
     display: inline-flex;
     align-items: center;

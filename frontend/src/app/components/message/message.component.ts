@@ -37,9 +37,9 @@ export class MessageComponent implements OnInit {
   followedUsers = signal<FollowedUser[]>([]);
   recentMessageUsers = signal<User[]>([]);
   selectedUser = signal<User | null>(null);
-  messages = signal<Message[]>([]); // Type the messages array
+  messages = signal<Message[]>([]);
   currentUserId = this.getUserIdFromToken();
-  newMessage = ''; // Regular string property for ngModel
+  newMessage = signal('');  // Change to signal
 
   ngOnInit() {
     this.loadFollowedUsers();
@@ -110,15 +110,15 @@ export class MessageComponent implements OnInit {
   }
 
   sendMessage() {
-    if (!this.newMessage.trim() || !this.selectedUser()) return;
+    if (!this.newMessage().trim() || !this.selectedUser()) return;
 
     this.messageService.sendMessage(
       this.selectedUser()?._id!, 
-      this.newMessage
+      this.newMessage()
     ).subscribe({
       next: (message) => {
         this.messages.update(msgs => [...msgs, message]);
-        this.newMessage = ''; // Clear the input
+        this.newMessage.set(''); // Update to use signal
         this.addToRecentUsers(this.selectedUser()!);
       },
       error: (err) => console.error('Error sending message:', err)

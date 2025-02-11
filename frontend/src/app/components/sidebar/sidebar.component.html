@@ -15,7 +15,12 @@
     </a>
   </div>
   <div class="nav-item">
-    <a routerLink="/messages" routerLinkActive="active"> 💬 Messages </a>
+    <a routerLink="/messages" routerLinkActive="active" class="message-link">
+      💬 Messages
+      <span class="message-badge" *ngIf="unreadMessageCount() > 0">
+        {{ unreadMessageCount() }}
+      </span>
+    </a>
   </div>
   <div class="nav-item">
     <a routerLink="/profile" routerLinkActive="active"> 👤 Profile </a>
