@@ -1,74 +1,82 @@
 <div class="messages-container">
   <div class="contacts-list">
+    <!-- Recent Chats Section -->
     <div class="recent-chats">
       <h3>Recent Chats</h3>
-      <div
-        *ngFor="let user of recentMessageUsers()"
-        class="contact-item"
-        [class.active]="selectedUser()?._id === user._id"
-        (click)="selectUser(user)"
-      >
-        <img
-          [src]="user.profilePicture || 'assets/default-avatar.png'"
-          alt="Avatar"
-        />
-        <span>{{ user.name }}</span>
+      <div class="chat-list">
+        <div
+          *ngFor="let user of recentMessageUsers()"
+          class="contact-item"
+          [class.active]="selectedUser()?._id === user._id"
+          (click)="selectUser(user)"
+        >
+          <img
+            [src]="user.profilePicture || 'assets/default-avatar.png'"
+            alt="Avatar"
+            class="contact-avatar"
+          />
+          <span class="contact-name">{{ user.name }}</span>
+        </div>
       </div>
     </div>
 
-    <div class="followed-users">
-      <h3>People I Follow</h3>
-      <div
-        *ngFor="let user of followedUsers()"
-        class="contact-item"
-        [class.active]="selectedUser()?._id === user.following._id"
-        (click)="selectUser(user.following)"
-      >
-        <img
-          [src]="user.following.profilePicture || 'assets/default-avatar.png'"
-          alt="Avatar"
-        />
-        <span>{{ user.following.name }}</span>
+    <!-- People I Follow Dropdown -->
+    <div class="followed-users-dropdown">
+      <button class="dropdown-toggle" (click)="toggleFollowList()">
+        <span>People I Follow</span>
+        <span class="arrow" [class.open]="isFollowListOpen()">▼</span>
+      </button>
+      
+      <div class="follow-list" [class.show]="isFollowListOpen()">
+        <div
+          *ngFor="let user of followedUsers()"
+          class="contact-item"
+          [class.active]="selectedUser()?._id === user.following._id"
+          (click)="selectUser(user.following)"
+        >
+          <img
+            [src]="user.following.profilePicture || 'assets/default-avatar.png'"
+            alt="Avatar"
+            class="contact-avatar"
+          />
+          <span class="contact-name">{{ user.following.name }}</span>
+        </div>
       </div>
     </div>
   </div>
 
+  <!-- Chat Area -->
   <div class="chat-area" *ngIf="selectedUser()">
     <div class="chat-header">
-      <div class="chat-area" *ngIf="selectedUser()">
-        <div class="chat-header">
-          <img
-            [src]="
-              selectedUser()?.profilePicture || 'assets/default-avatar.png'
-            "
-            alt="Avatar"
-          />
-          <span>{{ selectedUser()?.name }}</span>
-        </div>
+      <img
+        [src]="selectedUser()?.profilePicture || 'assets/default-avatar.png'"
+        alt="Avatar"
+        class="header-avatar"
+      />
+      <span class="header-name">{{ selectedUser()?.name }}</span>
+    </div>
 
-        <div class="messages-list">
-          <div
-            *ngFor="let message of messages()"
-            class="message"
-            [class.sent]="message.sender._id === currentUserId"
-            [class.received]="message.sender._id !== currentUserId"
-          >
-            <p>{{ message.content }}</p>
-            <span class="time">{{ message.createdAt | date : "short" }}</span>
-          </div>
-        </div>
-
-        <div class="message-input">
-          <input
-            type="text"
-            [ngModel]="newMessage()"
-            (ngModelChange)="newMessage.set($event)"
-            (keyup.enter)="sendMessage()"
-            placeholder="Type a message..."
-          />
-          <button (click)="sendMessage()">Send</button>
-        </div>
+    <div class="messages-list">
+      <div
+        *ngFor="let message of messages()"
+        class="message"
+        [class.sent]="message.sender._id === currentUserId"
+        [class.received]="message.sender._id !== currentUserId"
+      >
+        <p>{{ message.content }}</p>
+        <span class="time">{{ message.createdAt | date : "short" }}</span>
       </div>
+    </div>
+
+    <div class="message-input">
+      <input
+        type="text"
+        [ngModel]="newMessage()"
+        (ngModelChange)="newMessage.set($event)"
+        (keyup.enter)="sendMessage()"
+        placeholder="Type a message..."
+      />
+      <button (click)="sendMessage()">Send</button>
     </div>
   </div>
 </div>

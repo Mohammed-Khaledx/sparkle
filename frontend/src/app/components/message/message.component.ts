@@ -1,5 +1,5 @@
 // src/app/components/messages/messages.component.ts
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MessageService } from '../../services/message.service';
@@ -40,6 +40,7 @@ export class MessageComponent implements OnInit {
   messages = signal<Message[]>([]);
   currentUserId = this.getUserIdFromToken();
   newMessage = signal('');  // Change to signal
+  isFollowListOpen = signal(false);
 
   ngOnInit() {
     this.loadFollowedUsers();
@@ -123,6 +124,18 @@ export class MessageComponent implements OnInit {
       },
       error: (err) => console.error('Error sending message:', err)
     });
+  }
+
+  toggleFollowList() {
+    this.isFollowListOpen.update(state => !state);
+  }
+
+  @HostListener('document:click', ['$event'])
+  onClickOutside(event: Event) {
+    const dropdown = (event.target as HTMLElement).closest('.followed-users-dropdown');
+    if (!dropdown && this.isFollowListOpen()) {
+      this.isFollowListOpen.set(false);
+    }
   }
 
   private getUserIdFromToken(): string {

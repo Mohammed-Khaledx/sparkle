@@ -1,1 +1,87 @@
-<p>profile works!</p>
+<div class="profile-container">
+  <!-- User Info Section -->
+  <div class="profile-header" *ngIf="profile()">
+    <div class="profile-info">
+      <div class="profile-picture-container">
+        <img [src]="profile()?.profilePicture || 'assets/default-avatar.png'" alt="Profile Picture">
+        <input 
+          type="file" 
+          #fileInput 
+          hidden 
+          accept="image/*" 
+          (change)="onFileSelected($event)"
+        >
+        <button *ngIf="isOwnProfile()" class="edit-picture" (click)="fileInput.click()">
+          📸 Change Picture
+        </button>
+      </div>
+
+      <div class="user-details" *ngIf="!isEditing()">
+        <h2>{{ profile()?.name }}</h2>
+        <p>{{ profile()?.bio || 'No bio yet' }}</p>
+        <div class="follow-stats">
+          <span>{{ profile()?.followersCount }} Followers</span>
+          <span>{{ profile()?.followingCount }} Following</span>
+        </div>
+        <button *ngIf="isOwnProfile()" (click)="isEditing.set(true)" class="edit-button">
+          ✏️ Edit Profile
+        </button>
+        <button *ngIf="!isOwnProfile()" (click)="toggleFollow(profile()?._id!)" class="follow-button">
+          {{ isFollowing() ? 'Unfollow' : 'Follow' }}
+        </button>
+      </div>
+
+      <!-- Edit Form -->
+      <form *ngIf="isEditing()" class="edit-form" (ngSubmit)="updateProfile(editForm.value)" #editForm="ngForm">
+        <input name="name" [ngModel]="profile()?.name" placeholder="Name">
+        <textarea name="bio" [ngModel]="profile()?.bio" placeholder="Bio"></textarea>
+        <div class="form-actions">
+          <button type="submit">Save</button>
+          <button type="button" (click)="isEditing.set(false)">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Create Post Section -->
+  <div *ngIf="isOwnProfile()" class="create-post">
+    <textarea 
+      [ngModel]="newPost()" 
+      (ngModelChange)="newPost.set($event)"
+      placeholder="What's on your mind?"
+    ></textarea>
+    <button (click)="createPost()">Post</button>
+  </div>
+
+  <!-- User Posts Section -->
+  <div class="posts-section">
+    <h3>Posts</h3>
+    <div class="post-card" *ngFor="let post of userPosts()">
+      <div class="post-header">
+        <img [src]="profile()?.profilePicture || 'assets/default-avatar.png'" alt="Profile" class="avatar">
+        <strong>{{ profile()?.name }}</strong>
+      </div>
+      
+      <p class="post-content">{{ post.content }}</p>
+      
+      <div class="post-actions">
+        <button 
+          (click)="toggleSpark(post._id)" 
+          [class.sparked]="hasSparked(post._id)"
+          class="spark-button">
+          ⚡ {{ post.sparkCount }}
+        </button>
+        
+        <button (click)="openComments(post._id)" class="comment-button">
+          💬 {{ post.commentCount }} Comments
+        </button>
+      </div>
+
+      <app-comment 
+        *ngIf="selectedPostId() === post._id" 
+        [postId]="post._id"
+        (commentCountChanged)="updatePostCommentCount(post._id, $event)">
+      </app-comment>
+    </div>
+  </div>
+</div>
