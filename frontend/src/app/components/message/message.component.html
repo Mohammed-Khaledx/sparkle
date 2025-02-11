@@ -1,0 +1,37 @@
+<div class="messages-container">
+  <div class="contacts-list">
+    <h3>Following</h3>
+    <div *ngFor="let user of followedUsers()" 
+         class="contact-item"
+         [class.active]="selectedUser()?._id === user.following._id"
+         (click)="selectUser(user.following)">
+      <img [src]="user.following.profilePicture || 'assets/default-avatar.png'" alt="Avatar">
+      <span>{{ user.following.name }}</span>
+    </div>
+  </div>
+
+  <div class="chat-area" *ngIf="selectedUser()">
+    <div class="chat-header">
+      <img [src]="selectedUser()?.profilePicture || 'assets/default-avatar.png'" alt="Avatar">
+      <span>{{ selectedUser()?.name }}</span>
+    </div>
+
+    <div class="messages-list">
+      <div *ngFor="let message of messages()" 
+           class="message"
+           [class.sent]="message.sender._id === currentUserId"
+           [class.received]="message.sender._id !== currentUserId">
+        <p>{{ message.content }}</p>
+        <span class="time">{{ message.createdAt | date:'short' }}</span>
+      </div>
+    </div>
+
+    <div class="message-input">
+      <input type="text" 
+             [(ngModel)]="newMessage()"
+             (keyup.enter)="sendMessage()"
+             placeholder="Type a message...">
+      <button (click)="sendMessage()">Send</button>
+    </div>
+  </div>
+</div>

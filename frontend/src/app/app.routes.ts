@@ -6,12 +6,18 @@ import { authGuard } from './services/auth.guard';
 import { FeedComponent } from './pages/feed/feed.component';
 import { ProfileComponent } from './pages/profile/profile.component';
 import { NotificationComponent } from './components/notification/notification.component';
+import { MessageComponent } from './components/message/message.component';
 export const routes: Routes = [
   { path: 'signin', component: SigninComponent },
   { path: 'signup', component: SignupComponent },
   {
     path: 'notifications',
     component: NotificationComponent,
+    canActivate: [authGuard],
+  },
+  {
+    path: 'messages',
+    component: MessageComponent,
     canActivate: [authGuard],
   },
   {
