@@ -3,43 +3,59 @@
   <div class="profile-header" *ngIf="profile()">
     <div class="profile-info">
       <div class="profile-picture-container">
-        <img [src]="profile()?.profilePicture || 'assets/default-avatar.png'" alt="Profile Picture">
-        <input 
-          type="file" 
-          #fileInput 
-          hidden 
-          accept="image/*" 
-          (change)="onFileSelected($event)"
-        >
-        <button *ngIf="isOwnProfile()" class="edit-picture" (click)="fileInput.click()">
+        <img [src]="profile()?.profilePicture?.url || '/assets/images/default-avatar.png'" alt="Profile Picture">        <input type="file" #fileInput hidden accept="image/*" (change)="onFileSelected($event)">
+        <button *ngIf="isOwnProfile()" class="edit-picture-btn" (click)="fileInput.click()">
           📸 Change Picture
         </button>
       </div>
 
-      <div class="user-details" *ngIf="!isEditing()">
-        <h2>{{ profile()?.name }}</h2>
-        <p>{{ profile()?.bio || 'No bio yet' }}</p>
-        <div class="follow-stats">
-          <span>{{ profile()?.followersCount }} Followers</span>
-          <span>{{ profile()?.followingCount }} Following</span>
+      <div class="user-info">
+        <div class="user-details" *ngIf="!isEditing()">
+          <h2>{{ profile()?.name }}</h2>
+          <p class="bio">{{ profile()?.bio || 'No bio yet' }}</p>
+          <div class="stats-container">
+            <div class="stat-item">
+              <span class="stat-value">{{ profile()?.followersCount || 0 }}</span>
+              <span class="stat-label">Followers</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-value">{{ profile()?.followingCount || 0 }}</span>
+              <span class="stat-label">Following</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-value">{{ userPosts().length }}</span>
+              <span class="stat-label">Posts</span>
+            </div>
+          </div>
+          <div class="profile-actions">
+            <button *ngIf="isOwnProfile()" (click)="isEditing.set(true)" class="edit-btn">
+              ✏️ Edit Profile
+            </button>
+            <button *ngIf="!isOwnProfile()" 
+                    (click)="toggleFollow(profile()?._id!)" 
+                    [class.following]="isFollowing()"
+                    class="follow-btn">
+              {{ isFollowing() ? '✓ Following' : '+ Follow' }}
+            </button>
+          </div>
         </div>
-        <button *ngIf="isOwnProfile()" (click)="isEditing.set(true)" class="edit-button">
-          ✏️ Edit Profile
-        </button>
-        <button *ngIf="!isOwnProfile()" (click)="toggleFollow(profile()?._id!)" class="follow-button">
-          {{ isFollowing() ? 'Unfollow' : 'Follow' }}
-        </button>
-      </div>
 
-      <!-- Edit Form -->
-      <form *ngIf="isEditing()" class="edit-form" (ngSubmit)="updateProfile(editForm.value)" #editForm="ngForm">
-        <input name="name" [ngModel]="profile()?.name" placeholder="Name">
-        <textarea name="bio" [ngModel]="profile()?.bio" placeholder="Bio"></textarea>
-        <div class="form-actions">
-          <button type="submit">Save</button>
-          <button type="button" (click)="isEditing.set(false)">Cancel</button>
-        </div>
-      </form>
+        <!-- Edit Form -->
+        <form *ngIf="isEditing()" class="edit-form" (ngSubmit)="updateProfile(editForm.value)" #editForm="ngForm">
+          <div class="form-group">
+            <label>Name</label>
+            <input name="name" [ngModel]="profile()?.name" placeholder="Name">
+          </div>
+          <div class="form-group">
+            <label>Bio</label>
+            <textarea name="bio" [ngModel]="profile()?.bio" placeholder="Write something about yourself"></textarea>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="save-btn">Save Changes</button>
+            <button type="button" class="cancel-btn" (click)="isEditing.set(false)">Cancel</button>
+          </div>
+        </form>
+      </div>
     </div>
   </div>
 
@@ -50,38 +66,98 @@
       (ngModelChange)="newPost.set($event)"
       placeholder="What's on your mind?"
     ></textarea>
-    <button (click)="createPost()">Post</button>
+    
+    <!-- Add image upload input -->
+    <div class="post-images">
+      <input 
+        type="file" 
+        id="post-images"
+        accept="image/*" 
+        multiple
+        (change)="onPostImagesSelected($event)"
+        #imageInput
+        hidden
+      >
+      <button type="button" class="add-image-btn" (click)="imageInput.click()">
+        📸 Add Images
+      </button>
+      
+      <!-- Preview selected images -->
+      <div class="image-previews" *ngIf="selectedPostImages.length > 0">
+        <div class="preview" *ngFor="let image of selectedPostImages">
+          <img [src]="image | safeUrl" alt="Preview">
+        </div>
+      </div>
+    </div>
+    
+    <div class="post-actions">
+      <button (click)="createPost()" class="post-btn">
+        Post {{ selectedPostImages.length ? 'with ' + selectedPostImages.length + ' image(s)' : '' }}
+      </button>
+    </div>
   </div>
 
   <!-- User Posts Section -->
   <div class="posts-section">
     <h3>Posts</h3>
-    <div class="post-card" *ngFor="let post of userPosts()">
-      <div class="post-header">
-        <img [src]="profile()?.profilePicture || 'assets/default-avatar.png'" alt="Profile" class="avatar">
-        <strong>{{ profile()?.name }}</strong>
-      </div>
-      
-      <p class="post-content">{{ post.content }}</p>
-      
-      <div class="post-actions">
-        <button 
-          (click)="toggleSpark(post._id)" 
-          [class.sparked]="hasSparked(post._id)"
-          class="spark-button">
-          ⚡ {{ post.sparkCount }}
-        </button>
+    <div class="posts-grid">
+      <div class="post-card" *ngFor="let post of userPosts()">
+        <div class="post-header">
+          <img [src]="post.author.profilePicture?.url || '/assets/images/default-avatar.png'" 
+               alt="Profile" 
+               class="avatar">
+          <div class="post-info">
+            <strong>{{ post.author.name }}</strong>
+            <span class="post-date">{{ post.createdAt | date:'mediumDate' }}</span>
+          </div>
+        </div>
         
-        <button (click)="openComments(post._id)" class="comment-button">
-          💬 {{ post.commentCount }} Comments
-        </button>
-      </div>
+        <p class="post-content">{{ post.content }}</p>
+        
+        <!-- Add post images display -->
+        <div class="post-images" *ngIf="post.images?.length">
+          <div class="image-grid" [class.single]="post.images.length === 1" 
+                                 [class.multiple]="post.images.length > 1">
+            <img *ngFor="let image of post.images" 
+                 [src]="image" 
+                 alt="Post image"
+                 class="post-image"
+                 (click)="openImageViewer(image)">
+          </div>
+        </div>
 
-      <app-comment 
-        *ngIf="selectedPostId() === post._id" 
-        [postId]="post._id"
-        (commentCountChanged)="updatePostCommentCount(post._id, $event)">
-      </app-comment>
+        <div class="post-actions">
+          <button 
+            (click)="toggleSpark(post._id)" 
+            [class.sparked]="hasSparked(post._id)"
+            class="action-btn spark-btn">
+            ⚡ {{ post.sparkCount }}
+          </button>
+          
+          <button (click)="openComments(post._id)" class="action-btn comment-btn">
+            💬 {{ post.commentCount }}
+          </button>
+        </div>
+
+        <app-comment 
+          *ngIf="selectedPostId() === post._id" 
+          [postId]="post._id"
+          (commentCountChanged)="updatePostCommentCount(post._id, $event)">
+        </app-comment>
+      </div>
     </div>
   </div>
 </div>
+
+<style>
+input, textarea {
+  background: var(--background-primary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+}
+
+button {
+  background: var(--primary-color);
+  color: var(--text-primary);
+}
+</style>

@@ -1,38 +1,67 @@
-  <!-- Use the new sidebar component -->
+<!-- Use the new sidebar component -->
   <!-- Main Content -->
   <main class="main-content">
     <div class="feed-container">
-      <h2>🔹 Feed</h2>
+      <h2>Your Feed</h2>
 
-      <div class="post-card" *ngFor="let post of posts()">
-        <div class="post-header">
-          <img [src]="post.author.profilePicture || 'assets/default-avatar.png'" alt="Profile" class="avatar">
-          <strong>{{ post.author.name }}</strong>
-        </div>
-        
-        <p class="post-content">{{ post.content }}</p>
-        
-        <div class="post-actions">
-          <button 
-            (click)="toggleSpark(post._id)" 
-            [class.sparked]="hasSparked(post._id)"
-            class="spark-button">
-            ⚡ {{ postCounts()[post._id] || post.sparkCount || 0 }}
-          </button>
+      <div class="posts-list">
+        <div class="post-card" *ngFor="let post of posts()">
+          <!-- Post Header -->
+          <div class="post-header">
+            <img [src]="feedService.getProfileImage(post.author.profilePicture)" 
+                 alt="Profile" 
+                 class="avatar"
+                 loading="lazy">
+            <div class="post-meta">
+              <strong>{{ post.author.name }}</strong>
+              <span class="post-date">{{ post.createdAt | date:'mediumDate' }}</span>
+            </div>
+          </div>
           
-          <button (click)="openComments(post._id)" class="comment-button">
-            💬 {{ post.commentCount }} Comments
-          </button>
-        </div>
+          <!-- Post Content -->
+          <p class="post-content">{{ post.content }}</p>
+          
+          <!-- Post Images -->
+          <div class="post-images" *ngIf="post.images?.length">
+            <div class="image-grid" [class.single]="post.images.length === 1" 
+                                  [class.multiple]="post.images.length > 1">
+              <img *ngFor="let image of post.images" 
+                   [src]="image" 
+                   alt="Post image"
+                   class="post-image"
+                   loading="lazy">
+            </div>
+          </div>
 
-        <app-comment 
-          *ngIf="selectedPostId() === post._id" 
-          [postId]="post._id"
-          (commentCountChanged)="updatePostCommentCount(post._id, $event)">
-        </app-comment>
+          <!-- Post Actions -->
+          <div class="post-actions">
+            <button (click)="toggleSpark(post._id)" 
+                    [class.sparked]="hasSparked(post._id)"
+                    class="action-btn spark-btn">
+              <span class="icon">⚡</span>
+              <span class="count">{{ postCounts()[post._id] || post.sparkCount || 0 }}</span>
+            </button>
+            
+            <button (click)="openComments(post._id)" 
+                    class="action-btn comment-btn">
+              <span class="icon">💬</span>
+              <span class="count">{{ post.commentCount }}</span>
+            </button>
+          </div>
+
+          <!-- Comments Section -->
+          <app-comment *ngIf="selectedPostId() === post._id" 
+                      [postId]="post._id"
+                      (commentCountChanged)="updatePostCommentCount(post._id, $event)">
+          </app-comment>
+        </div>
       </div>
       
-      <button *ngIf="hasMore()" (click)="loadFeed()" [disabled]="loading()" class="load-more">
+      <!-- Load More Button -->
+      <button *ngIf="hasMore()" 
+              (click)="loadFeed()" 
+              [disabled]="loading()" 
+              class="load-more">
         {{ loading() ? 'Loading...' : 'Load More' }}
       </button>
     </div>

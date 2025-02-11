@@ -25,18 +25,16 @@ export class NotificationService {
   private notificationSubject = new Subject<NotificationData>();
   private socket: Socket;
 
-
-
   constructor() {
-    // Initialize socket connection with auth token
     this.socket = io('http://localhost:3000', {
       auth: { token: localStorage.getItem('token') }
     });
 
-    // Initialize unread count
+    this.initializeSocketListeners();
     this.fetchUnreadCount();
+  }
 
-    // Listen for new notifications
+  private initializeSocketListeners() {
     this.socket.on('notification', (data: NotificationData) => {
       this.notificationSubject.next(data);
       this.unreadCount.update(count => count + 1);

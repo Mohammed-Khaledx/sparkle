@@ -11,7 +11,7 @@ const {
   getPostById,
   getPostCounts,
   getUserPostStats,
-  getPostComments
+  getPostComments,getUserPosts
 } = require("../controllers/post_controller");
 
 //get the home page posts 
@@ -29,5 +29,7 @@ router.get("/:id/comments", auth, getPostComments);
 router.get("/:id/counts", auth, getPostCounts);
 // very helpfull route for dashboard
 router.get("/user/:userId/stats", auth, getUserPostStats);
+
+router.get("/user/:userId", auth, getUserPosts);
 
 module.exports = router;

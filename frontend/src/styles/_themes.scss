@@ -1,0 +1,130 @@
+:root {
+  // Modern gradients
+  --gradient-blue: linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%);
+  --gradient-red: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%);
+  --gradient-dark: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  
+  // Primary colors (Blue)
+  --blue-50: #eff6ff;
+  --blue-100: #dbeafe;
+  --blue-200: #bfdbfe;
+  --blue-300: #93c5fd;
+  --blue-400: #60a5fa;
+  --blue-500: #3b82f6;
+  --blue-600: #2563eb;
+  --blue-700: #1d4ed8;
+  
+  // Accent colors (Red)
+  --red-50: #fef2f2;
+  --red-100: #fee2e2;
+  --red-200: #fecaca;
+  --red-300: #fca5a5;
+  --red-400: #f87171;
+  --red-500: #ef4444;
+  --red-600: #dc2626;
+  --red-700: #b91c1c;
+  
+  // Neutral colors
+  --slate-50: #f8fafc;
+  --slate-100: #f1f5f9;
+  --slate-200: #e2e8f0;
+  --slate-300: #cbd5e1;
+  --slate-400: #94a3b8;
+  --slate-500: #64748b;
+  --slate-600: #475569;
+  --slate-700: #334155;
+  --slate-800: #1e293b;
+  --slate-900: #0f172a;
+  --slate-950: #020617;
+
+  // Light theme
+  --primary-color: var(--blue-500);
+  --primary-light: var(--blue-100);
+  --primary-dark: var(--blue-700);
+  
+  --accent-color: var(--red-500);
+  --accent-light: var(--red-100);
+  --accent-dark: var(--red-700);
+  
+  --background-primary: var(--slate-50);
+  --background-secondary: white;
+  --background-tertiary: var(--slate-100);
+  
+  --text-primary: var(--slate-900);
+  --text-secondary: var(--slate-700);
+  --text-tertiary: var(--slate-500);
+  
+  --border-color: var(--slate-200);
+  
+  // Button styles
+  --button-primary-bg: var(--gradient-blue);
+  --button-primary-text: white;
+  --button-primary-hover: brightness(1.1);
+  
+  --button-secondary-bg: var(--blue-50);
+  --button-secondary-text: var(--blue-700);
+  --button-secondary-hover: var(--blue-100);
+  
+  --button-accent-bg: var(--gradient-red);
+  --button-accent-text: white;
+  --button-accent-hover: brightness(1.1);
+  
+  // Shadows
+  --shadow-sm: 0 2px 4px rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px rgb(0 0 0 / 0.07);
+  --shadow-lg: 0 10px 15px rgb(0 0 0 / 0.1);
+  
+  // Border radius
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-full: 9999px;
+}
+
+[data-theme="dark"] {
+  --primary-color: var(--blue-400);
+  --primary-light: var(--blue-900);
+  --primary-dark: var(--blue-200);
+  
+  --accent-color: var(--red-400);
+  --accent-light: var(--red-900);
+  --accent-dark: var(--red-200);
+  
+  --background-primary: var(--slate-950);
+  --background-secondary: var(--slate-900);
+  --background-tertiary: var(--slate-800);
+  
+  --text-primary: var(--slate-100);
+  --text-secondary: var(--slate-300);
+  --text-tertiary: var(--slate-400);
+  
+  --border-color: var(--slate-800);
+  
+  // Button styles dark
+  --button-primary-bg: var(--gradient-blue);
+  --button-primary-text: white;
+  --button-primary-hover: brightness(1.2);
+  
+  --button-secondary-bg: var(--slate-800);
+  --button-secondary-text: var(--blue-300);
+  --button-secondary-hover: var(--slate-700);
+  
+  --button-accent-bg: var(--gradient-red);
+  --button-accent-text: white;
+  --button-accent-hover: brightness(1.2);
+  
+  // Shadows for dark mode
+  --shadow-sm: 0 2px 4px rgb(0 0 0 / 0.3);
+  --shadow-md: 0 4px 6px rgb(0 0 0 / 0.4);
+  --shadow-lg: 0 10px 15px rgb(0 0 0 / 0.5);
+}
+
+// Special glass effect for cards in dark mode
+[data-theme="dark"] .card {
+  background: linear-gradient(
+    rgba(255, 255, 255, 0.05),
+    rgba(255, 255, 255, 0.02)
+  );
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}

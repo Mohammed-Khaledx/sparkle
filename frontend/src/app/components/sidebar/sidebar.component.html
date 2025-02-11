@@ -1,28 +1,35 @@
 <nav class="sidebar">
   <div class="nav-item">
-    <a routerLink="/feed" routerLinkActive="active"> 🏠 Home </a>
+    <a routerLink="/feed" routerLinkActive="active">
+      <span>🏠</span>
+      Feed
+    </a>
   </div>
+  
   <div class="nav-item">
-    <a
-      routerLink="/notifications"
-      routerLinkActive="active"
-      class="notification-link"
-    >
-      🔔 Notifications
+    <a routerLink="/notifications" routerLinkActive="active" class="notification-link">
+      <span>🔔</span>
+      Notifications
       <span class="notification-badge" *ngIf="unreadCount() > 0">
         {{ unreadCount() }}
       </span>
     </a>
   </div>
+  
   <div class="nav-item">
     <a routerLink="/messages" routerLinkActive="active" class="message-link">
-      💬 Messages
+      <span>💬</span>
+      Messages
       <span class="message-badge" *ngIf="unreadMessageCount() > 0">
         {{ unreadMessageCount() }}
       </span>
     </a>
   </div>
+  
   <div class="nav-item">
-    <a routerLink="/profile" routerLinkActive="active"> 👤 Profile </a>
+    <a routerLink="/profile" routerLinkActive="active">
+      <span>👤</span>
+      Profile
+    </a>
   </div>
 </nav>

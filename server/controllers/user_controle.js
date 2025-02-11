@@ -93,7 +93,9 @@ let getAllUsers = async (req, res) => {
 
 let getUserById = async (req, res) => {
   try {
-    const user = await User.findById(req.params.id).select("-password");
+    const userId = req.params.id; // Get user ID from params
+    const user = await User.findById(userId).select("-password");
+    
     if (!user) {
       return res.status(404).json({
         status: "error",
@@ -101,10 +103,9 @@ let getUserById = async (req, res) => {
       });
     }
 
-    // Fetch follow data and return the count of follwers and following
-    const followersCount = await Follow.countDocuments({ following: id });
-    const followingCount = await Follow.countDocuments({ follower: id });
-
+    // Use userId instead of undefined 'id'
+    const followersCount = await Follow.countDocuments({ following: userId });
+    const followingCount = await Follow.countDocuments({ follower: userId });
 
     res.status(200).json({
       user,
@@ -112,7 +113,7 @@ let getUserById = async (req, res) => {
       followingCount,
     });
   } catch (error) {
-    res.status(500).json(error.message);
+    res.status(500).json({ message: error.message });
   }
 };
 
@@ -144,7 +145,6 @@ let updateUser = async (req, res) => {
 const updateProfilePicture = async (req, res) => {
   try {
     const user = await User.findById(req.user.userId);
-
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
@@ -153,13 +153,19 @@ const updateProfilePicture = async (req, res) => {
       return res.status(400).json({ message: "No file uploaded" });
     }
 
+    // Store complete URL
+    const imageUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
+    
     if (user.profilePicture && user.profilePicture.url) {
-      // Delete previous image if it exists
-      await fs.unlink(user.profilePicture.url);
+      const oldPath = user.profilePicture.url.split('/uploads/')[1];
+      if (oldPath) {
+        await fs.unlink(path.join(__dirname, '../uploads', oldPath));
+      }
     }
 
-    user.profilePicture = { url: req.file.path };
+    user.profilePicture = { url: imageUrl };
     await user.save();
+    
     res.json({
       message: "Profile picture updated",
       profilePicture: user.profilePicture,

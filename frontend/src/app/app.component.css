@@ -1,17 +1,30 @@
 .page-layout {
-    display: grid;
-    grid-template-columns: 250px 1fr;  /* Fixed width for sidebar */
-    gap: 20px;
-    padding: 20px;
-    max-width: 1200px;
-    margin: 0 auto;
+  display: flex;
+  min-height: calc(100vh - var(--navbar-height));
+}
+
+.main-content {
+  flex: 1;
+  padding: 20px;
+  transition: all 0.3s ease;
+}
+
+.main-content.with-sidebar {
+  margin-left: 280px; /* Adjust based on sidebar width */
+}
+
+.main-content.full-width {
+  margin-left: 0;
+  max-width: 100%;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .main-content.with-sidebar {
+    margin-left: 0;
   }
   
-  .main-content {
-    min-width: 0;
-    width: 100%;
+  app-sidebar {
+    display: none;
   }
-  
-  .full-width {
-    grid-column: 1 / -1;
-  }
+}

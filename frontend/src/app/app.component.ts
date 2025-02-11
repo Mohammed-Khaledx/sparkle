@@ -1,25 +1,30 @@
-import { Component , inject } from '@angular/core';
+import { Component, inject, computed } from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
 import { NavbarComponent } from './components/navbar/navbar.component';
 import { SidebarComponent } from './components/sidebar/sidebar.component';
+import { CommonModule } from '@angular/common';
 
-// import { ExploreComponent } from "./components/explore/explore.component";
-// import { HomePageComponent } from './components/home-page/home-page.component';
-// import { MassegesComponent } from './components/masseges/masseges.component';
-// import { NavComponent } from './components/nav/nav.component';
 @Component({
   selector: 'app-root',
-  standalone : true,
-  imports: [RouterOutlet, NavbarComponent ,SidebarComponent],
+  standalone: true,
+  imports: [CommonModule, RouterOutlet, NavbarComponent, SidebarComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
 export class AppComponent {
-  title = 'frontend';
   private router = inject(Router);
 
-  showSidebar(): boolean {
+  // Compute if sidebar should be shown
+  showSidebar = computed(() => {
     const currentRoute = this.router.url;
-    return !['/signin', '/signup'].includes(currentRoute);
-  }
+    const authRoutes = ['/signin', '/signup'];
+    return !authRoutes.includes(currentRoute);
+  });
+
+  // Compute main content class
+  mainContentClass = computed(() => ({
+    'main-content': true,
+    'with-sidebar': this.showSidebar(),
+    'full-width': !this.showSidebar()
+  }));
 }

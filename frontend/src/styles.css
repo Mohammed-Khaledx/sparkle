@@ -1,1 +1,204 @@
-/* You can add global styles to this file, and also import other style files */
+@import './styles/_themes.scss';
+
+/* Reset & Base Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--background-primary);
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
+  font-family: system-ui, -apple-system, sans-serif;
+  line-height: 1.5;
+}
+
+/* Card & Common Components */
+.card {
+  background-color: var(--background-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--shadow-md);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+/* Card with glass effect */
+.card-glass {
+  background: linear-gradient(
+    rgba(255, 255, 255, 0.05),
+    rgba(255, 255, 255, 0.02)
+  );
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Button Base Styles */
+.btn {
+  padding: 0.5rem 1rem;
+  border-radius: var(--border-radius-full);
+  border: none;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+/* Primary Button */
+.btn-primary {
+  background: var(--button-primary-bg);
+  color: var(--button-primary-text);
+}
+
+.btn-primary:hover {
+  background: var(--button-primary-hover);
+  transform: translateY(-1px);
+}
+
+/* Secondary Button */
+.btn-secondary {
+  background: var(--button-secondary-bg);
+  color: var(--button-secondary-text);
+}
+
+.btn-secondary:hover {
+  background: var(--button-secondary-hover);
+  transform: translateY(-1px);
+}
+
+/* Tertiary Button */
+.btn-tertiary {
+  background: var(--button-tertiary-bg);
+  color: var(--button-tertiary-text);
+  border: 1px solid currentColor;
+}
+
+.btn-tertiary:hover {
+  background: var(--button-tertiary-hover);
+}
+
+/* Danger Button */
+.btn-danger {
+  background: var(--button-danger-bg);
+  color: white;
+}
+
+.btn-danger:hover {
+  background: var(--button-danger-hover);
+  transform: translateY(-1px);
+}
+
+/* Modern Gradient Button */
+.btn-gradient {
+  background: var(--gradient-blue);
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius-full);
+  border: none;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-gradient:hover {
+  filter: var(--button-primary-hover);
+  transform: translateY(-1px);
+}
+
+.btn-gradient.accent {
+  background: var(--gradient-red);
+}
+
+/* Glass Button */
+.btn-glass {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: var(--text-primary);
+}
+
+.btn-glass:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Button Sizes */
+.btn-sm {
+  padding: 0.25rem 0.75rem;
+  font-size: 0.875rem;
+}
+
+.btn-lg {
+  padding: 0.75rem 1.5rem;
+  font-size: 1.125rem;
+}
+
+/* Icon Button */
+.btn-icon {
+  padding: 0.5rem;
+  border-radius: 50%;
+  aspect-ratio: 1;
+}
+
+/* Input Styles */
+.input {
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-md);
+  background: var(--background-primary);
+  color: var(--text-primary);
+  transition: border-color 0.2s ease;
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px var(--primary-100);
+}
+
+/* Avatar Styles */
+.avatar {
+  border-radius: var(--border-radius-full);
+  object-fit: cover;
+  border: 2px solid var(--background-secondary);
+}
+
+/* Badge Styles */
+.badge {
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--border-radius-full);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+/* Scrollbar Styles */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--background-primary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--neutral-500);
+  border-radius: var(--border-radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--neutral-600);
+}
+
+:root {
+  /* ... existing variables ... */
+  --navbar-height: 64px;
+  --sidebar-width: 280px;
+}

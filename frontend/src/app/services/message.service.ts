@@ -36,25 +36,16 @@ export class MessageService {
       auth: { token: localStorage.getItem('token') }
     });
 
-    // Initialize socket event listeners
     this.initializeSocketListeners();
   }
 
   private initializeSocketListeners() {
-    this.socket.on('connect', () => {
-      console.log('Socket connected');
-    });
-
     this.socket.on('message', (data: Message) => {
       this.messageSubject.next(data);
       const currentUserId = this.getUserIdFromToken();
       if (data.receiver._id === currentUserId) {
         this.unreadCount.update(count => count + 1);
       }
-    });
-
-    this.socket.on('error', (error) => {
-      console.error('Socket error:', error);
     });
   }
 
@@ -89,8 +80,7 @@ export class MessageService {
   }
 
   sendMessage(receiverId: string, content: string): Observable<Message> {
-    const message = { receiver: receiverId, content };
-    return this.http.post<Message>(this.apiUrl, message);
+    return this.http.post<Message>(this.apiUrl, { receiver: receiverId, content });
   }
 
   getMessages(otherUserId: string): Observable<Message[]> {

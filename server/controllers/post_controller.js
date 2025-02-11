@@ -37,7 +37,9 @@ exports.postUpload = multer({
 exports.createPost = async (req, res) => {
   try {
     const { content } = req.body;
-    const images = req.files ? req.files.map((file) => file.path) : [];
+    const images = req.files ? req.files.map(file => 
+      `${req.protocol}://${req.get('host')}/uploads/posts/${file.filename}`
+    ) : [];
 
     const newPost = new Post({
       content,
@@ -46,15 +48,11 @@ exports.createPost = async (req, res) => {
     });
 
     const post = await newPost.save();
-
-    // Populate author details
     await post.populate("author", "name profilePicture");
 
     res.status(201).json(post);
   } catch (error) {
-    res
-      .status(400)
-      .json({ message: "Error creating post", error: error.message });
+    res.status(400).json({ message: "Error creating post", error: error.message });
   }
 };
 
@@ -353,5 +351,28 @@ exports.getFeedPosts = async (req, res) => {
   } catch (error) {
     console.error(error);
     return res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+// Update getUserPosts to include images
+exports.getUserPosts = async (req, res) => {
+  try {
+    const posts = await Post.find({ author: req.params.userId })
+      .sort({ createdAt: -1 })
+      .select('content author sparks comments createdAt sparkCount commentCount images')
+      .populate('author', 'name profilePicture')
+      .populate({
+        path: 'comments.user',
+        select: 'name profilePicture'
+      });
+
+    if (!posts) {
+      return res.status(404).json({ message: "No posts found" });
+    }
+
+    res.status(200).json(posts);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
   }
 };

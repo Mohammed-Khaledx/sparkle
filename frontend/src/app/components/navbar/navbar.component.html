@@ -1,12 +1,38 @@
 <nav class="navbar">
-    <div class="logo">
-      <a routerLink="/">⚡ Sparky</a>
-    </div>
-    <ul class="nav-links">
-      <li><a routerLink="/feed">Feed</a></li>
-      <li *ngIf="isLoggedIn()"> <a routerLink="/profile">Profile</a></li>
-      <li *ngIf="!isLoggedIn()"> <a routerLink="/signin">Login</a></li>
-      <li *ngIf="!isLoggedIn()"> <a routerLink="/signup">Sign Up</a></li>
-      <li *ngIf="isLoggedIn()"> <button (click)="logout()">Logout</button></li>
-    </ul>
-  </nav>
+  <div class="logo">
+    <a routerLink="/">
+      <span class="sparkle">✨</span>
+      <span class="brand-name">Sparkle</span>
+    </a>
+  </div>
+  
+  <ul class="nav-links">
+    <li>
+      <a routerLink="/feed" routerLinkActive="active">
+        <span class="icon">🏠</span>
+        Feed
+      </a>
+    </li>
+    <li *ngIf="isLoggedIn()">
+      <a routerLink="/profile" routerLinkActive="active">
+        <span class="icon">👤</span>
+        Profile
+      </a>
+    </li>
+    <li *ngIf="!isLoggedIn()">
+      <a routerLink="/signin" routerLinkActive="active" class="auth-link">Login</a>
+    </li>
+    <li *ngIf="!isLoggedIn()">
+      <a routerLink="/signup" routerLinkActive="active" class="signup-btn">Sign Up</a>
+    </li>
+    <li *ngIf="isLoggedIn()">
+      <button (click)="logout()" class="logout-btn">
+        <span class="icon">🚪</span>
+        Logout
+      </button>
+    </li>
+  </ul>
+  <button class="theme-toggle" (click)="toggleTheme()">
+    {{ isDarkTheme() ? '☀️' : '🌙' }}
+  </button>
+</nav>
