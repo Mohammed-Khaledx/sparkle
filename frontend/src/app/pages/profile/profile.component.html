@@ -31,11 +31,12 @@
             <button *ngIf="isOwnProfile()" (click)="isEditing.set(true)" class="edit-btn">
               ✏️ Edit Profile
             </button>
+            <!-- Follow/Unfollow Button -->
             <button *ngIf="!isOwnProfile()" 
                     (click)="toggleFollow(profile()?._id!)" 
-                    [class.following]="isFollowing()"
-                    class="follow-btn">
-              {{ isFollowing() ? '✓ Following' : '+ Follow' }}
+                    class="follow-btn"
+                    [class.following]="isUserFollowing(profile()?._id)">
+              {{ isUserFollowing(profile()?._id) ? '✓ Following' : '+ Follow' }}
             </button>
           </div>
         </div>
@@ -182,7 +183,7 @@
       </div>
 
       <div class="users-grid">
-        <div *ngFor="let user of (showFollowers() ? followers() : following())" 
+        <div *ngFor="let user of (showFollowers() ? followStore.followers() : followStore.following())" 
              class="user-card" 
              [class.mutual]="isUserFollowed(user._id)">
           <img [src]="user.profilePicture?.url || '/assets/images/default-avatar.png'" 

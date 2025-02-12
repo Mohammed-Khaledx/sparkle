@@ -6,6 +6,7 @@ import { FeedService, Post } from '../../services/feed.service';
 import { CommentComponent } from '../../components/comment/comment.component';
 import { HttpClient } from '@angular/common/http';
 import { SafeUrlPipe } from '../../pipes/safe-url.pipe';
+import { FollowStoreService } from '../../services/follow-store.service';
 
 interface User {
   _id: string;
@@ -37,6 +38,7 @@ export class ProfileComponent implements OnInit {
   private http = inject(HttpClient);
   private feedService = inject(FeedService);
   private route = inject(ActivatedRoute);
+  public followStore = inject(FollowStoreService);
 
   profile = signal<UserProfile | null>(null);
   userPosts = signal<Post[]>([]);
@@ -58,22 +60,23 @@ export class ProfileComponent implements OnInit {
   showFollowers = signal(true);
 
 
+
   ngOnInit() {
     this.route.params.subscribe(params => {
       const userId = params['id'] || this.getUserIdFromToken();
       if (!userId) return;
 
-      // Reset states when profile changes
-      this.followStatus.set(new Map());
-      this.followers.set([]);
-      this.following.set([]);
+      // Reset follow signals via the store
+      this.followStore.followStatus.set(new Map());
+      this.followStore.followers.set([]);
+      this.followStore.following.set([]);
       
       // Load all profile data
       this.loadProfile(userId);
       this.loadUserPosts(userId);
       this.loadUserStats(userId);
-      this.loadFollowers(userId);
-      this.loadFollowing(userId);
+      this.followStore.loadFollowers(userId);
+      this.followStore.loadFollowing(userId);
       this.checkIfOwnProfile(userId);
       
       // Check follow status only if not own profile
@@ -184,66 +187,40 @@ export class ProfileComponent implements OnInit {
     });
   }
 
+  // Simpler method to check if we're following someone
+  isUserFollowing(userId?: string): boolean {
+    const targetId = userId || this.profile()?._id;
+    return targetId ? this.followStore.followStatus().get(targetId) || false : false;
+  }
 
+  // Simplified toggle follow method
   toggleFollow(userId: string) {
-    if (!userId) return;
+    if (!userId || this.isCurrentUser(userId)) return;
     
-    const isFollowing = this.followStatus().get(userId) || false;
-    const action = isFollowing ? 'unfollow' : 'follow';
-    
-    this.http.post(`http://localhost:3000/followOrUnfollow/${userId}/${action}`, {}).subscribe({
+    const currentlyFollowing = this.followStore.followStatus().get(userId) || false;
+    this.followStore.toggleFollow(userId, currentlyFollowing).subscribe({
       next: () => {
-        // Update follow status
-        this.followStatus.update(map => {
-          const newMap = new Map(map);
-          newMap.set(userId, !isFollowing);
-          return newMap;
-        });
-
-        // Update profile followers count if we're on the profile page of the user we're following/unfollowing
-        if (this.profile()?._id === userId) {
-          this.profile.update(p => p ? {
-            ...p,
-            followersCount: p.followersCount + (isFollowing ? -1 : 1)
-          } : null);
-        }
-
-        // Update current user's following count if we're on our own profile
-        const currentUserId = this.getUserIdFromToken();
-        if (currentUserId === this.profile()?._id) {
-          this.profile.update(p => p ? {
-            ...p,
-            followingCount: p.followingCount + (isFollowing ? -1 : 1)
-          } : null);
-        }
-
-        // Update lists based on current view
-        if (this.showFollowers()) {
-          // If unfollowing someone from followers list
-          if (isFollowing) {
-            this.followers.update(list => list.filter(u => u._id !== userId));
-          }
-        } else {
-          // If unfollowing someone from following list
-          if (isFollowing) {
-            this.following.update(list => list.filter(u => u._id !== userId));
-          } else {
-            // If following someone, add them to following list
-            const userToAdd = this.followers().find(u => u._id === userId);
-            if (userToAdd) {
-              this.following.update(list => [userToAdd, ...list]);
-            }
-          }
-        }
+        this.followStore.updateFollowStatus(userId, !currentlyFollowing);
+        this.profile.update(p => p ? { 
+          ...p, 
+          followersCount: p.followersCount + (currentlyFollowing ? -1 : 1) 
+        } : null);
+        this.followStore.loadFollowers(userId);
+        this.followStore.loadFollowing(userId);
       },
       error: (err) => {
         console.error('Error toggling follow:', err);
-        // Revert follow status on error
-        this.followStatus.update(map => {
-          const newMap = new Map(map);
-          newMap.set(userId, isFollowing);
-          return newMap;
-        });
+        // Optionally, you can trigger a status refresh here.
+        if (this.profile()?._id) {
+          const profileId = this.profile()?._id;
+          if (profileId) {
+            this.followStore.loadFollowers(profileId);
+          }
+          if (profileId) {
+            this.followStore.loadFollowing(profileId);
+          }
+          
+        }
       }
     });
   }
@@ -306,17 +283,19 @@ export class ProfileComponent implements OnInit {
   }
 
   private checkFollowStatus(userId: string) {
+    if (!userId) return;
+    
     this.http.get<{ isFollowing: boolean }>(
       `http://localhost:3000/followOrUnfollow/${userId}/status`
     ).subscribe({
       next: (response) => {
-        this.followStatus.update(map => {
-          const newMap = new Map(map);
-          newMap.set(userId, response.isFollowing);
-          return newMap;
-        });
+        this.followStore.updateFollowStatus(userId, response.isFollowing);
       },
-      error: (err) => console.error('Error checking follow status:', err)
+      error: (err) => {
+        console.error('Error checking follow status:', err);
+        // Remove status on error
+        this.followStore.updateFollowStatus(userId, false);
+      }
     });
   }
 
@@ -337,6 +316,8 @@ export class ProfileComponent implements OnInit {
 
   // Load followers and following
   loadFollowers(userId: string) {
+    if (!userId) return;
+    
     this.http.get<{ data: any[] }>(
       `http://localhost:3000/followOrUnfollow/${userId}?type=followers`
     ).subscribe({
@@ -344,7 +325,7 @@ export class ProfileComponent implements OnInit {
         const followers = response.data.map(f => f.follower);
         this.followers.set(followers);
         
-        // Check follow status for each follower except current user
+        // Check follow status for each follower
         const currentUserId = this.getUserIdFromToken();
         followers.forEach(user => {
           if (user._id !== currentUserId) {
@@ -360,6 +341,8 @@ export class ProfileComponent implements OnInit {
   }
 
   loadFollowing(userId: string) {
+    if (!userId) return;
+    
     this.http.get<{ data: any[] }>(
       `http://localhost:3000/followOrUnfollow/${userId}?type=following`
     ).subscribe({
@@ -367,13 +350,9 @@ export class ProfileComponent implements OnInit {
         const following = response.data.map(f => f.following);
         this.following.set(following);
         
-        // Set follow status to true for all following
+        // All users in following list are being followed by default
         following.forEach(user => {
-          this.followStatus.update(map => {
-            const newMap = new Map(map);
-            newMap.set(user._id, true);
-            return newMap;
-          });
+          this.followStore.updateFollowStatus(user._id, true);
         });
       },
       error: (err) => {
@@ -385,7 +364,7 @@ export class ProfileComponent implements OnInit {
 
   // Add method to check follow status for any user
   isUserFollowed(userId: string): boolean {
-    return this.followStatus().get(userId) || false;
+    return this.followStore.followStatus().get(userId) || false;
   }
 
   toggleConnectionsView(view: 'followers' | 'following') {
@@ -396,4 +375,51 @@ export class ProfileComponent implements OnInit {
   isCurrentUser(userId: string): boolean {
     return userId === this.getUserIdFromToken();
   }
+
+  // private updateFollowStatus(userId: string, isFollowing: boolean) {
+  //   this.followStatus.update(map => {
+  //     const newMap = new Map(map);
+  //     newMap.set(userId, isFollowing);
+  //     return newMap;
+  //   });
+  // }
+
+  private updateUserLists(userId: string, isFollowing: boolean) {
+    if (this.showFollowers()) {
+      if (!isFollowing) {
+        // Add to followers
+        const userToAdd = this.following().find(u => u._id === userId);
+        if (userToAdd) {
+          this.followers.update(list => [userToAdd, ...list]);
+        }
+      } else {
+        // Remove from followers
+        this.followers.update(list => list.filter(u => u._id !== userId));
+      }
+    }
+
+    if (isFollowing) {
+      // Remove from following
+      this.following.update(list => list.filter(u => u._id !== userId));
+    }
+  }
+
+  // Helper method for follow status updates
+  private updateFollowStatus(userId: string, isFollowing: boolean) {
+    if (!userId) return;
+    
+    this.followStore.followStatus.update(map => {
+      const newMap = new Map(map);
+      newMap.set(userId, isFollowing);
+      return newMap;
+    });
+  }
+
+//   // Helper method to check and update user lists
+//   private refreshUserLists(userId: string) {
+//     if (this.profile()?._id) {
+//       this.loadFollowers(this.profile()._id);
+//       this.loadFollowing(this.profile()._id);
+//     }
+//   }
 }
