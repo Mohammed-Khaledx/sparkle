@@ -34,7 +34,7 @@ export class SignupComponent {
           // this data is the response from the backend server
           // and it has a token
           console.log(data);
-          this.router.navigate(['/signin']);
+          this.router.navigate(['/auth/signin']);
         },
         error: (err) => console.log(err),
       });

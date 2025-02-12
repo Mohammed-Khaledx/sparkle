@@ -1,0 +1,22 @@
+.page-layout {
+  display: flex;
+  min-height: calc(100vh - var(--navbar-height));
+}
+
+main {
+  flex: 1;
+  padding: 20px;
+  transition: all 0.3s ease;
+  margin-left: 280px; /* Adjust based on sidebar width */
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .main-content.with-sidebar {
+    margin-left: 0;
+  }
+
+  app-sidebar {
+    display: none;
+  }
+}
