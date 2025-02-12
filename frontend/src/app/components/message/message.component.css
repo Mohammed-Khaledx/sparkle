@@ -91,19 +91,56 @@
 .contact-item {
   display: flex;
   align-items: center;
-  padding: 10px 15px;
+  padding: 12px 16px;
   cursor: pointer;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   margin: 2px 0;
   transition: all 0.2s ease;
+  gap: 12px;
+}
+
+.contact-item.unread {
+  background: var(--primary-light);
+}
+
+.contact-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.unread-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--primary-color);
+  display: inline-block;
+}
+
+.message-preview {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.preview-text {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 150px;
 }
 
 .contact-item:hover {
-  background: #e9ecef;
+  background: var(--background-tertiary);
 }
 
 .contact-item.active {
-  background: #e3f2fd;
+  background: var(--primary-light);
 }
 
 .contact-avatar {
@@ -111,13 +148,26 @@
   height: 40px;
   border-radius: 50%;
   object-fit: cover;
-  margin-right: 12px;
-  border: 2px solid #fff;
+  border: 2px solid var(--background-secondary);
+  box-shadow: var(--shadow-sm);
+  background-color: var(--background-tertiary); /* Placeholder color while loading */
 }
 
 .contact-name {
-  font-size: 0.9rem;
-  color: #333;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.contact-info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.last-message-time {
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+  white-space: nowrap;
 }
 
 /* Chat Area Styling */
@@ -141,6 +191,9 @@
   height: 40px;
   border-radius: 50%;
   margin-right: 12px;
+  border: 2px solid var(--background-secondary);
+  box-shadow: var(--shadow-sm);
+  background-color: var(--background-tertiary);
 }
 
 .header-name {
@@ -221,4 +274,22 @@
 
 .message-input button:hover {
   background: #0056b3;
+}
+
+/* Add loading state styles */
+.contact-avatar.loading,
+.header-avatar.loading {
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+  100% {
+    opacity: 1;
+  }
 }

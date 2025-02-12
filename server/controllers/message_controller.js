@@ -77,43 +77,50 @@ const getRecentMessages = async (req, res) => {
       $or: [{ sender: userId }, { receiver: userId }]
     })
     .sort({ createdAt: -1 })
-    .limit(20)
     .populate('sender', 'name profilePicture')
-    .populate('receiver', 'name profilePicture');
+    .populate('receiver', 'name profilePicture')
+    .limit(20);
+
+    if (!messages) {
+      return res.status(200).json({ messages: [] });
+    }
 
     res.status(200).json({ messages });
   } catch (error) {
+    console.error('Error fetching recent messages:', error);
     res.status(500).json({ error: "Failed to fetch recent messages" });
   }
 };
 
-// // Update message status to "seen"
-// const markMessagesAsSeen = async (req, res) => {
-//   try {
-//     const messageId = req.params;
+// Uncomment and fix the markMessagesAsSeen function
+const markMessagesAsSeen = async (req, res) => {
+  try {
+    const messageId = req.params.messageId;
+    const userId = req.user.userId;
 
-//     // const { sender } = req.body;
-//     // const receiver = req.user.userId;
+    const message = await Message.findById(messageId);
+    if (!message) {
+      return res.status(404).json({ error: "Message not found" });
+    }
 
-//     const message = await Message.findOne({messageId})
+    // Only mark as read if user is the receiver
+    if (message.receiver.toString() !== userId) {
+      return res.status(403).json({ error: "Not authorized to mark this message as read" });
+    }
 
-//     console.log(sender ,"  " , receiver )
-//     const sender = message.sender;
-//     const receiver = req.user.userId;
+    message.read = true;
+    await message.save();
 
-//     await Message.updateMany(
-//       { sender, receiver, read: false },
-//       { read: true }
-//     );
-
-//     res.status(200).json({ message: "Messages marked as seen" });
-//   } catch (error) {
-//     res.status(500).json({ error: "Failed to update message status" });
-//   }
-// };
+    res.status(200).json({ message: "Message marked as read" });
+  } catch (error) {
+    console.error('Error marking message as read:', error);
+    res.status(500).json({ error: "Failed to mark message as read" });
+  }
+};
 
 module.exports = {
   sendMessage,
   getMessages,
-  getRecentMessages
+  getRecentMessages,
+  markMessagesAsSeen  // Make sure to export the function
 };

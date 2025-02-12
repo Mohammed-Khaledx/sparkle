@@ -41,6 +41,8 @@ export class MessageComponent implements OnInit {
   currentUserId = this.getUserIdFromToken();
   newMessage = signal('');  // Change to signal
   isFollowListOpen = signal(false);
+  unreadMessages = signal<Set<string>>(new Set());
+  lastMessages = signal<{ [key: string]: Message }>({});
 
   ngOnInit() {
     this.loadFollowedUsers();
@@ -50,7 +52,14 @@ export class MessageComponent implements OnInit {
       if (this.selectedUser()?._id === message.sender._id || 
           this.selectedUser()?._id === message.receiver._id) {
         this.messages.update(msgs => [...msgs, message]);
+        if (message.receiver._id === this.currentUserId) {
+          this.messageService.markAsRead(message._id);
+        }
+      } else if (message.receiver._id === this.currentUserId) {
+        this.unreadMessages.update(set => new Set(set).add(message.sender._id));
       }
+      
+      this.updateLastMessage(message);
       
       if (message.sender._id !== this.currentUserId) {
         this.addToRecentUsers(message.sender);
@@ -61,14 +70,31 @@ export class MessageComponent implements OnInit {
   loadRecentMessages() {
     this.messageService.getRecentMessages().subscribe({
       next: (response) => {
-        const recentUsers = response.messages
-          .map(msg => msg.sender._id === this.currentUserId ? msg.receiver : msg.sender)
-          .filter((user, index, self) => 
-            index === self.findIndex(u => u._id === user._id)
-          );
+        if (!response.messages) {
+          this.recentMessageUsers.set([]);
+          return;
+        }
+
+        // Get unique users from recent messages
+        const recentUsers = response.messages.reduce((users: User[], msg: Message) => {
+          const otherUser = msg.sender._id === this.currentUserId ? msg.receiver : msg.sender;
+          if (!users.some(u => u._id === otherUser._id)) {
+            users.push(otherUser);
+          }
+          // Update last message for this user
+          this.lastMessages.update(msgs => ({
+            ...msgs,
+            [otherUser._id]: msg
+          }));
+          return users;
+        }, []);
+        
         this.recentMessageUsers.set(recentUsers);
       },
-      error: (err) => console.error('Error loading recent messages:', err)
+      error: (err) => {
+        console.error('Error loading recent messages:', err);
+        this.recentMessageUsers.set([]);
+      }
     });
   }
 
@@ -98,6 +124,13 @@ export class MessageComponent implements OnInit {
 
   selectUser(user: User) {
     this.selectedUser.set(user);
+    if (this.unreadMessages().has(user._id)) {
+      this.unreadMessages.update(set => {
+        const newSet = new Set(set);
+        newSet.delete(user._id);
+        return newSet;
+      });
+    }
     this.loadMessages(user._id);
   }
 
@@ -148,5 +181,20 @@ export class MessageComponent implements OnInit {
       console.error('Error decoding token:', e);
       return '';
     }
+  }
+
+  private updateLastMessage(message: Message) {
+    this.lastMessages.update(msgs => ({
+      ...msgs,
+      [message.sender._id === this.currentUserId ? message.receiver._id : message.sender._id]: message
+    }));
+  }
+
+  hasUnreadMessages(userId: string): boolean {
+    return this.unreadMessages().has(userId);
+  }
+
+  getLastMessage(userId: string): Message | undefined {
+    return this.lastMessages()[userId];
   }
 }

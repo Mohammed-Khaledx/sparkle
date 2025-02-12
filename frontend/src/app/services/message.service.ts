@@ -1,8 +1,9 @@
 // src/app/services/message.service.ts
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, Subject } from 'rxjs';
+import { Observable, Subject, of, throwError } from 'rxjs';
 import { io, Socket } from 'socket.io-client';
+import { map, catchError } from 'rxjs/operators';
 
 interface Message {
   _id: string;
@@ -72,7 +73,17 @@ export class MessageService {
   }
 
   getRecentMessages(): Observable<{ messages: Message[] }> {
-    return this.http.get<{ messages: Message[] }>(`${this.apiUrl}/recent`);
+    return this.http.get<{ messages: Message[] }>(`${this.apiUrl}/recent`).pipe(
+      map(response => ({
+        messages: response.messages?.sort((a, b) => 
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        ) || []
+      })),
+      catchError(error => {
+        console.error('Error fetching recent messages:', error);
+        return of({ messages: [] });
+      })
+    );
   }
 
   getNewMessages(): Observable<Message> {
@@ -85,6 +96,19 @@ export class MessageService {
 
   getMessages(otherUserId: string): Observable<Message[]> {
     return this.http.get<Message[]>(`${this.apiUrl}/${otherUserId}`);
+  }
+
+  markAsRead(messageId: string): Observable<any> {
+    return this.http.patch(`${this.apiUrl}/seen/${messageId}`, {}).pipe(
+      catchError(error => {
+        console.error('Error marking message as read:', error);
+        return throwError(() => error);
+      })
+    );
+  }
+
+  markAllAsRead(userId: string): Observable<any> {
+    return this.http.patch(`${this.apiUrl}/mark-all-read/${userId}`, {});
   }
 
   // Cleanup method

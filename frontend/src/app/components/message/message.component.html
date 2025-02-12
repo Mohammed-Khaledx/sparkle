@@ -8,14 +8,27 @@
           *ngFor="let user of recentMessageUsers()"
           class="contact-item"
           [class.active]="selectedUser()?._id === user._id"
+          [class.unread]="hasUnreadMessages(user._id)"
           (click)="selectUser(user)"
         >
           <img
-            [src]="user.profilePicture || 'assets/default-avatar.png'"
+            [src]="user.profilePicture || '/assets/images/default-avatar.png'"
             alt="Avatar"
             class="contact-avatar"
+            loading="lazy"
           />
-          <span class="contact-name">{{ user.name }}</span>
+          <div class="contact-info">
+            <div class="contact-header">
+              <span class="contact-name">{{ user.name }}</span>
+              <span class="unread-indicator" *ngIf="hasUnreadMessages(user._id)"></span>
+            </div>
+            <div class="message-preview" *ngIf="getLastMessage(user._id) as lastMessage">
+              <span class="preview-text">{{ lastMessage.content }}</span>
+              <span class="last-message-time">
+                {{ lastMessage.createdAt | date:'shortTime' }}
+              </span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
