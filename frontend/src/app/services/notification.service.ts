@@ -1,6 +1,7 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, Subject } from 'rxjs';
+import { Observable, Subject, throwError } from 'rxjs';
+import { tap, catchError } from 'rxjs/operators';
 import { io, Socket } from 'socket.io-client';
 
 interface NotificationData {
@@ -42,7 +43,8 @@ export class NotificationService {
   }
 
   private fetchUnreadCount() {
-    this.http.get<{ count: number }>(`${this.apiUrl}/unread/count`)
+    // Fix: Change the endpoint URL to match the backend route
+    this.http.get<{ count: number }>(`${this.apiUrl}/unread-count`)
       .subscribe({
         next: (response) => this.unreadCount.set(response.count),
         error: (err) => console.error('Error fetching unread count:', err)
@@ -57,8 +59,32 @@ export class NotificationService {
     return this.http.get<{ notifications: NotificationData[] }>(this.apiUrl);
   }
 
-  markAsRead(notificationId: string) {
-    return this.http.patch(`${this.apiUrl}/${notificationId}/read`, {});
+  // Mark single notification as read
+  markAsRead(notificationId: string): Observable<any> {
+    return this.http.patch(`${this.apiUrl}/${notificationId}/read`, {}).pipe(
+      tap(() => {
+        // Decrease unread count
+        this.unreadCount.update(count => Math.max(0, count - 1));
+      }),
+      catchError(error => {
+        console.error('Error marking notification as read:', error);
+        return throwError(() => error);
+      })
+    );
+  }
+
+  // Mark all notifications as read
+  markAllAsRead(): Observable<any> {
+    return this.http.post(`${this.apiUrl}/mark-all-read`, {}).pipe(
+      tap(() => {
+        // Reset unread count to 0
+        this.unreadCount.set(0);
+      }),
+      catchError(error => {
+        console.error('Error marking all notifications as read:', error);
+        return throwError(() => error);
+      })
+    );
   }
 
   getUnreadCount() {

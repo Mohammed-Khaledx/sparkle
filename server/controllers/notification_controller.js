@@ -36,6 +36,7 @@ exports.getUnreadCount = async (req, res) => {
 
     res.json({ count });
   } catch (err) {
+    console.error('Error getting unread count:', err);
     res.status(500).json({ error: err.message });
   }
 };
