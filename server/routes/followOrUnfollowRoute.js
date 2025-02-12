@@ -1,13 +1,18 @@
-const app = require('express')
-const followRoute = app.Router();
+const express = require('express');  // Changed from 'const app = require('express')'
+const followRoute = express.Router(); // Changed from 'app.Router()'
 const auth = require("../middlewares/auth");
 
-const { followUser, unfollowUser, getFollowersOrFollowing ,getFollowStatus } = require("../controllers/follow_controller");
+const { 
+  followUser, 
+  unfollowUser, 
+  getFollowersOrFollowing,
+  getFollowStatus 
+} = require("../controllers/follow_controller");
 
+// Routes
+followRoute.post("/:id/follow", auth, followUser);
+followRoute.post("/:id/unfollow", auth, unfollowUser);
+followRoute.get("/:id", auth, getFollowersOrFollowing);
+followRoute.get("/:id/status", auth, getFollowStatus);
 
-followRoute.post("/:id/follow", auth, followUser); // Follow a user
-followRoute.post("/:id/unfollow", auth, unfollowUser); // Unfollow a user
-followRoute.get("/:id", auth, getFollowersOrFollowing); // Get followers/following (query param `type`)
-followRoute.get("/:id/status", auth, getFollowStatus); // Check follow status
-
-module.exports = followRoute
+module.exports = followRoute;
