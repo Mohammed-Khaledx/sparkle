@@ -1,27 +1,28 @@
 <div class="notifications-container">
-  <h2>Notifications</h2>
+  <div class="notifications-header">
+    <h2>Notifications</h2>
+    <button class="mark-all-read" (click)="markAllAsRead()">
+      Mark all as read
+    </button>
+  </div>
+
   <div class="notification-list">
-    <div
-      *ngFor="let notification of notifications()"
-      class="notification-item"
-      [class.unread]="!notification.isRead"
-    >
+    <div *ngFor="let notification of notifications()"
+         class="notification-item"
+         [class.unread]="!notification.isRead"
+         (click)="markAsRead(notification._id)">
       <div class="notification-content">
-        <img
-          [src]="
-            notification.sender.profilePicture || 'assets/default-avatar.png'
-          "
-          alt="Profile"
-          class="avatar"
-        />
+        <img [src]="notification.sender.profilePicture || 'assets/default-avatar.png'"
+             alt="Profile"
+             class="avatar">
         <div class="notification-text">
           <p>
             <strong>{{ notification.sender.name }}</strong>
             {{ notification.message }}
           </p>
-          <span class="notification-time">{{
-            notification.createdAt | date : "short"
-          }}</span>
+          <span class="notification-time">
+            {{ notification.createdAt | date:'short' }}
+          </span>
         </div>
       </div>
     </div>

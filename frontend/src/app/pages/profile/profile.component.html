@@ -31,11 +31,12 @@
             <button *ngIf="isOwnProfile()" (click)="isEditing.set(true)" class="edit-btn">
               ✏️ Edit Profile
             </button>
+            <!-- Follow/Unfollow Button -->
             <button *ngIf="!isOwnProfile()" 
                     (click)="toggleFollow(profile()?._id!)" 
-                    [class.following]="isFollowing()"
-                    class="follow-btn">
-              {{ isFollowing() ? '✓ Following' : '+ Follow' }}
+                    class="follow-btn"
+                    [class.following]="isUserFollowing(profile()?._id)">
+              {{ isUserFollowing(profile()?._id) ? '✓ Following' : '+ Follow' }}
             </button>
           </div>
         </div>
@@ -59,8 +60,23 @@
     </div>
   </div>
 
-  <!-- Create Post Section -->
-  <div *ngIf="isOwnProfile()" class="create-post">
+  <!-- Add tab navigation after profile header -->
+  <div class="profile-tabs">
+    <button 
+      class="tab-btn" 
+      [class.active]="activeTab() === 'posts'"
+      (click)="activeTab.set('posts')">
+      📝 Posts
+    </button>
+    <button 
+      class="tab-btn" 
+      [class.active]="activeTab() === 'connections'"
+      (click)="activeTab.set('connections')">
+      👥 Connections
+    </button>
+  </div>
+  <!-- Create Post Section (only show on posts tab) -->
+  <div *ngIf="isOwnProfile() && activeTab() === 'posts'" class="create-post">
     <textarea 
       [ngModel]="newPost()" 
       (ngModelChange)="newPost.set($event)"
@@ -97,56 +113,99 @@
     </div>
   </div>
 
-  <!-- User Posts Section -->
-  <div class="posts-section">
-    <h3>Posts</h3>
-    <div class="posts-grid">
-      <div class="post-card" *ngFor="let post of userPosts()">
-        <div class="post-header">
-          <img [src]="post.author.profilePicture?.url || '/assets/images/default-avatar.png'" 
-               alt="Profile" 
-               class="avatar">
-          <div class="post-info">
-            <strong>{{ post.author.name }}</strong>
-            <span class="post-date">{{ post.createdAt | date:'mediumDate' }}</span>
+  <!-- Content sections -->
+  <div [ngSwitch]="activeTab()">
+    <!-- Posts Tab -->
+    <div *ngSwitchCase="'posts'" class="posts-section">
+      <div class="posts-grid">
+        <div class="post-card" *ngFor="let post of userPosts()">
+          <div class="post-header">
+            <img [src]="post.author.profilePicture?.url || '/assets/images/default-avatar.png'" 
+                 alt="Profile" 
+                 class="avatar">
+            <div class="post-info">
+              <strong>{{ post.author.name }}</strong>
+              <span class="post-date">{{ post.createdAt | date:'mediumDate' }}</span>
+            </div>
           </div>
-        </div>
-        
-        <p class="post-content">{{ post.content }}</p>
-        
-        <!-- Add post images display -->
-        <div class="post-images" *ngIf="post.images?.length">
-          <div class="image-grid" [class.single]="post.images.length === 1" 
-                                 [class.multiple]="post.images.length > 1">
-            <img *ngFor="let image of post.images" 
-                 [src]="image" 
-                 alt="Post image"
-                 class="post-image"
-                 (click)="openImageViewer(image)">
-          </div>
-        </div>
-
-        <div class="post-actions">
-          <button 
-            (click)="toggleSpark(post._id)" 
-            [class.sparked]="hasSparked(post._id)"
-            class="action-btn spark-btn">
-            ⚡ {{ post.sparkCount }}
-          </button>
           
-          <button (click)="openComments(post._id)" class="action-btn comment-btn">
-            💬 {{ post.commentCount }}
-          </button>
-        </div>
+          <p class="post-content">{{ post.content }}</p>
+          
+          <!-- Add post images display -->
+          <div class="post-images" *ngIf="post.images?.length">
+            <div class="image-grid" [class.single]="post.images.length === 1" 
+                                   [class.multiple]="post.images.length > 1">
+              <img *ngFor="let image of post.images" 
+                   [src]="image" 
+                   alt="Post image"
+                   class="post-image"
+                   (click)="openImageViewer(image)">
+            </div>
+          </div>
 
-        <app-comment 
-          *ngIf="selectedPostId() === post._id" 
-          [postId]="post._id"
-          (commentCountChanged)="updatePostCommentCount(post._id, $event)">
-        </app-comment>
+          <div class="post-actions">
+            <button 
+              (click)="toggleSpark(post._id)" 
+              [class.sparked]="hasSparked(post._id)"
+              class="action-btn spark-btn">
+              ⚡ {{ post.sparkCount }}
+            </button>
+            
+            <button (click)="openComments(post._id)" class="action-btn comment-btn">
+              💬 {{ post.commentCount }}
+            </button>
+          </div>
+
+          <app-comment 
+            *ngIf="selectedPostId() === post._id" 
+            [postId]="post._id"
+            (commentCountChanged)="updatePostCommentCount(post._id, $event)">
+          </app-comment>
+        </div>
+      </div>
+    </div>
+
+    <!-- Connections Tab -->
+    <div *ngSwitchCase="'connections'" class="connections-container">
+      <div class="connections-header">
+        <button 
+          class="connection-toggle" 
+          [class.active]="showFollowers()"
+          (click)="toggleConnectionsView('followers')">
+          Followers ({{ profile()?.followersCount || 0 }})
+        </button>
+        <button 
+          class="connection-toggle" 
+          [class.active]="!showFollowers()"
+          (click)="toggleConnectionsView('following')">
+          Following ({{ profile()?.followingCount || 0 }})
+        </button>
+      </div>
+
+      <div class="users-grid">
+        <div *ngFor="let user of (showFollowers() ? followStore.followers() : followStore.following())" 
+             class="user-card" 
+             [class.mutual]="isUserFollowed(user._id)">
+          <img [src]="user.profilePicture?.url || '/assets/images/default-avatar.png'" 
+               alt="Profile" 
+               class="user-avatar">
+          <div class="user-info">
+            <div class="user-header">
+              <h3>{{ user.name }}</h3>
+              <span class="mutual-badge" *ngIf="isUserFollowed(user._id)">Mutual</span>
+            </div>
+            <button class="follow-btn" 
+                    *ngIf="user._id !== getUserIdFromToken()"
+                    [class.following]="isUserFollowed(user._id)"
+                    (click)="toggleFollow(user._id)">
+              {{ isUserFollowed(user._id) ? '✓ Following' : '+ Follow' }}
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
+  
 </div>
 
 <style>

@@ -10,12 +10,40 @@
     gap: 10px;
   }
   
+  .notifications-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+
+  .mark-all-read {
+    padding: 8px 16px;
+    border: none;
+    border-radius: var(--radius-md);
+    background: var(--primary-color);
+    color: white;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .mark-all-read:hover {
+    background: var(--primary-hover);
+    transform: translateY(-1px);
+  }
+
   .notification-item {
     background: white;
     border-radius: 8px;
     padding: 15px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     transition: background-color 0.3s;
+    cursor: pointer;
+  }
+
+  .notification-item:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
   }
   
   .notification-item.unread {

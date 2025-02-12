@@ -18,38 +18,20 @@ interface Notification {
   selector: 'app-notification',
   standalone: true,
   imports: [CommonModule],
-  template: `
-    <div class="notifications-container">
-      <h2>Notifications</h2>
-      <div class="notification-list">
-        <div *ngFor="let notification of notifications()" 
-             class="notification-item"
-             [class.unread]="!notification.isRead">
-          <div class="notification-content">
-            <img [src]="notification.sender.profilePicture || 'assets/default-avatar.png'" 
-                 alt="Profile" 
-                 class="avatar">
-            <div class="notification-text">
-              <p><strong>{{ notification.sender.name }}</strong> {{ notification.message }}</p>
-              <span class="notification-time">{{ notification.createdAt | date:'short' }}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  `,
+  templateUrl: './notification.component.html',
   styleUrls: ['./notification.component.css']
 })
 export class NotificationComponent implements OnInit {
   private notificationService = inject(NotificationService);
   notifications = signal<Notification[]>([]);
+  loading = signal(false);
+  error = signal<string | null>(null);
 
   ngOnInit() {
-    // Load initial notifications
     this.loadNotifications();
 
-    this.notificationService.resetUnreadCount();
-
+    // Mark all as read when component loads
+    this.markAllAsRead();
     
     // Subscribe to real-time notifications
     this.notificationService.getNotifications().subscribe(notification => {
@@ -76,6 +58,17 @@ export class NotificationComponent implements OnInit {
         );
       },
       error: (err) => console.error('Error marking notification as read:', err)
+    });
+  }
+
+  markAllAsRead() {
+    this.notificationService.markAllAsRead().subscribe({
+      next: () => {
+        this.notifications.update(notifications =>
+          notifications.map(n => ({ ...n, isRead: true }))
+        );
+      },
+      error: (err) => console.error('Error marking all notifications as read:', err)
     });
   }
 }
