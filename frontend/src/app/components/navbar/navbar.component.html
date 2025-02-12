@@ -5,7 +5,7 @@
       <span class="brand-name">Sparkle</span>
     </a>
   </div>
-  
+
   <ul class="nav-links">
     <li>
       <a routerLink="/feed" routerLinkActive="active">
@@ -20,10 +20,14 @@
       </a>
     </li>
     <li *ngIf="!isLoggedIn()">
-      <a routerLink="/signin" routerLinkActive="active" class="auth-link">Login</a>
+      <a routerLink="/auth/signin" routerLinkActive="active" class="auth-link"
+        >Login</a
+      >
     </li>
     <li *ngIf="!isLoggedIn()">
-      <a routerLink="/signup" routerLinkActive="active" class="signup-btn">Sign Up</a>
+      <a routerLink="/auth/signup" routerLinkActive="active" class="signup-btn"
+        >Sign Up</a
+      >
     </li>
     <li *ngIf="isLoggedIn()">
       <button (click)="logout()" class="logout-btn">
@@ -33,6 +37,6 @@
     </li>
   </ul>
   <button class="theme-toggle" (click)="toggleTheme()">
-    {{ isDarkTheme() ? '☀️' : '🌙' }}
+    {{ isDarkTheme() ? "☀️" : "🌙" }}
   </button>
 </nav>

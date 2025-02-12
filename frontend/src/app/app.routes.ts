@@ -8,8 +8,8 @@ import { ProfileComponent } from './pages/profile/profile.component';
 import { NotificationComponent } from './components/notification/notification.component';
 import { MessageComponent } from './components/message/message.component';
 export const routes: Routes = [
-  { path: 'signin', component: SigninComponent },
-  { path: 'signup', component: SignupComponent },
+  { path: 'auth/signin', component: SigninComponent },
+  { path: 'auth/signup', component: SignupComponent },
   {
     path: 'notifications',
     component: NotificationComponent,
@@ -35,6 +35,6 @@ export const routes: Routes = [
     component: ProfileComponent,
     canActivate: [authGuard],
   },
-  { path: '', redirectTo: '/signin', pathMatch: 'full' },
+  { path: '', redirectTo: '/auth/signin', pathMatch: 'full' },
   { path: '**', redirectTo: '/feed' },
 ];
