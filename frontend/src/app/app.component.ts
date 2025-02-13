@@ -20,7 +20,6 @@ export class AppComponent {
     this.router.events
       .pipe(filter((event) => event instanceof NavigationEnd))
       .subscribe((event: NavigationEnd) => {
-        console.log(event.urlAfterRedirects);
         this.authLayout = event.urlAfterRedirects.includes('/auth/');
       });
   }

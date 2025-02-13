@@ -6,10 +6,6 @@
 const User = require("../models/user_model");
 const Follow = require("../models/follow_model");
 
-
-
-
-
 // for uplaod images
 const multer = require("multer");
 const path = require("path");
@@ -17,7 +13,7 @@ const fs = require("fs").promises; // For deleting files
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    const uploadPath = path.join(__dirname, '../uploads');
+    const uploadPath = path.join(__dirname, "../uploads");
 
     cb(null, uploadPath);
   },
@@ -46,7 +42,6 @@ const upload = multer({
   },
 });
 
-
 // CREATE
 // replaced by register
 let createUser = async (req, res) => {
@@ -62,9 +57,12 @@ let createUser = async (req, res) => {
 
 // READ
 let getAllUsers = async (req, res) => {
-  console.log("get Notes by controller throw routes finally in indexjs");
+  const { limit } = req.query;
   try {
-    const users = await User.find().select("-password");
+    const users = await User.find()
+      .select("-password -__v")
+      .limit(limit ?? 50)
+      .lean();
     res.json(users);
   } catch (error) {
     res.status(500).json({
@@ -95,7 +93,7 @@ let getUserById = async (req, res) => {
   try {
     const userId = req.params.id; // Get user ID from params
     const user = await User.findById(userId).select("-password");
-    
+
     if (!user) {
       return res.status(404).json({
         status: "error",
@@ -140,7 +138,6 @@ let updateUser = async (req, res) => {
   }
 };
 
-
 // update profile picture
 const updateProfilePicture = async (req, res) => {
   try {
@@ -154,18 +151,20 @@ const updateProfilePicture = async (req, res) => {
     }
 
     // Store complete URL
-    const imageUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
-    
+    const imageUrl = `${req.protocol}://${req.get("host")}/uploads/${
+      req.file.filename
+    }`;
+
     if (user.profilePicture && user.profilePicture.url) {
-      const oldPath = user.profilePicture.url.split('/uploads/')[1];
+      const oldPath = user.profilePicture.url.split("/uploads/")[1];
       if (oldPath) {
-        await fs.unlink(path.join(__dirname, '../uploads', oldPath));
+        await fs.unlink(path.join(__dirname, "../uploads", oldPath));
       }
     }
 
     user.profilePicture = { url: imageUrl };
     await user.save();
-    
+
     res.json({
       message: "Profile picture updated",
       profilePicture: user.profilePicture,

@@ -1,0 +1,33 @@
+<section>
+  <h1>Explore all members</h1>
+  <div class="members">
+    @for (user of users; track $index) {
+      <div class="item">
+        <div class="member">
+          <div class="content">
+            <div class="bg"></div>
+            <div class="profile-image">
+              <img
+                [src]="
+                  user.profilePicture.url
+                    ? user.profilePicture.url
+                    : 'assets/default-avatar.png'
+                "
+                alt
+              />
+            </div>
+            <h2>{{ user.name }}</h2>
+            <p class="bio">No bio yet</p>
+          </div>
+          @if (following.includes(user._id)) {
+            <button (click)="toggleFollow(user._id)">Unfollow</button>
+          } @else {
+            <button (click)="toggleFollow(user._id)" class="follow">
+              Follow
+            </button>
+          }
+        </div>
+      </div>
+    }
+  </div>
+</section>
