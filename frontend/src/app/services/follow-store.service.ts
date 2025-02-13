@@ -14,7 +14,7 @@ export class FollowStoreService {
   following = signal<User[]>([]);
   followStatus = signal<Map<string, boolean>>(new Map());
 
-  constructor(private http: HttpClient) {}
+   constructor(private http: HttpClient) {}
 
   loadFollowers(userId: string): void {
     if (!userId) return;

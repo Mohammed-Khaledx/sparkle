@@ -11,7 +11,7 @@ const {
   getPostById,
   getPostCounts,
   getUserPostStats,
-  getPostComments,getUserPosts
+  getPostComments,getUserPosts,generatePostContent
 } = require("../controllers/post_controller");
 
 //get the home page posts 
@@ -19,6 +19,9 @@ router.get("/feed", auth, getFeedPosts);
 
 router.post("/", auth, postUpload.array("images", 5), createPost);
 router.get("/", auth, getAllPosts);
+
+// AI generating
+router.get('/generate', auth, generatePostContent);
 
 // to get a post or view it you might not be sign in
 router.get("/:id", auth, getPostById);

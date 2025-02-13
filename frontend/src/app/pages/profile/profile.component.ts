@@ -1,12 +1,13 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, NgModel } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { FeedService, Post } from '../../services/feed.service';
 import { CommentComponent } from '../../components/comment/comment.component';
 import { HttpClient } from '@angular/common/http';
 import { SafeUrlPipe } from '../../pipes/safe-url.pipe';
 import { FollowStoreService } from '../../services/follow-store.service';
+
 
 interface User {
   _id: string;
@@ -58,6 +59,9 @@ export class ProfileComponent implements OnInit {
   following = signal<User[]>([]);
   followStatus = signal<Map<string, boolean>>(new Map());
   showFollowers = signal(true);
+  isGenerating = signal(false);
+  selectedTopic = signal<string>('');
+
 
 
 
@@ -384,42 +388,54 @@ export class ProfileComponent implements OnInit {
   //   });
   // }
 
-  private updateUserLists(userId: string, isFollowing: boolean) {
-    if (this.showFollowers()) {
-      if (!isFollowing) {
-        // Add to followers
-        const userToAdd = this.following().find(u => u._id === userId);
-        if (userToAdd) {
-          this.followers.update(list => [userToAdd, ...list]);
-        }
-      } else {
-        // Remove from followers
-        this.followers.update(list => list.filter(u => u._id !== userId));
-      }
-    }
+  // private updateUserLists(userId: string, isFollowing: boolean) {
+  //   if (this.showFollowers()) {
+  //     if (!isFollowing) {
+  //       // Add to followers
+  //       const userToAdd = this.following().find(u => u._id === userId);
+  //       if (userToAdd) {
+  //         this.followers.update(list => [userToAdd, ...list]);
+  //       }
+  //     } else {
+  //       // Remove from followers
+  //       this.followers.update(list => list.filter(u => u._id !== userId));
+  //     }
+  //   }
 
-    if (isFollowing) {
-      // Remove from following
-      this.following.update(list => list.filter(u => u._id !== userId));
-    }
-  }
+  //   if (isFollowing) {
+  //     // Remove from following
+  //     this.following.update(list => list.filter(u => u._id !== userId));
+  //   }
+  // }
 
-  // Helper method for follow status updates
-  private updateFollowStatus(userId: string, isFollowing: boolean) {
-    if (!userId) return;
+  // // Helper method for follow status updates
+  // private updateFollowStatus(userId: string, isFollowing: boolean) {
+  //   if (!userId) return;
     
-    this.followStore.followStatus.update(map => {
-      const newMap = new Map(map);
-      newMap.set(userId, isFollowing);
-      return newMap;
+  //   this.followStore.followStatus.update(map => {
+  //     const newMap = new Map(map);
+  //     newMap.set(userId, isFollowing);
+  //     return newMap;
+  //   });
+  // }
+  generateAIPost() {
+    const topic = this.selectedTopic()?.trim();
+    if (!topic) {
+      console.warn('Please enter a topic first');
+      return;
+    }
+  
+    this.isGenerating.set(true);
+    this.feedService.generateAIPostContent(topic).subscribe({
+      next: (response) => {
+        this.newPost.set(response.content);
+        this.isGenerating.set(false);
+        this.selectedTopic.set('');
+      },
+      error: (err) => {
+        console.error('Error generating AI post:', err);
+        this.isGenerating.set(false);
+      }
     });
   }
-
-//   // Helper method to check and update user lists
-//   private refreshUserLists(userId: string) {
-//     if (this.profile()?._id) {
-//       this.loadFollowers(this.profile()._id);
-//       this.loadFollowing(this.profile()._id);
-//     }
-//   }
 }
