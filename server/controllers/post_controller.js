@@ -7,7 +7,6 @@ require("dotenv").config();
 const axios = require("axios");
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 
-
 const { io } = require("../index"); // Import the io instance
 const { emitToUser } = require("../socket/socket");
 
@@ -389,8 +388,6 @@ exports.getUserPosts = async (req, res) => {
     console.error(error);
     res.status(500).json({ message: "Server error" });
   }
-
-
 };
 
 // AI Gemini
@@ -415,16 +412,100 @@ exports.generatePostContent = async (req, res) => {
     const response = await result.response;
     const content = response.text();
 
-    const cleanContent = content
-      .replace(/^["']|["']$/g, '')
-      .trim();
+    const cleanContent = content.replace(/^["']|["']$/g, "").trim();
 
     res.json({ content: cleanContent });
   } catch (error) {
     console.error("Gemini API Error:", error);
-    res.status(500).json({ 
-      message: "Error generating post content", 
-      error: error.message 
+    res.status(500).json({
+      message: "Error generating post content",
+      error: error.message,
     });
+  }
+};
+
+exports.addAdvice = async (req, res) => {
+  try {
+    const { content } = req.body;
+    const userId = req.user.userId;
+    const postId = req.params.id;
+
+    const post = await Post.findById(postId).populate("author", "name");
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+
+    const updatedPost = await Post.findByIdAndUpdate(
+      postId,
+      {
+        $push: {
+          advices: {
+            user: userId,
+            content,
+            createdAt: new Date(),
+          },
+        },
+        $inc: { adviceCount: 1 },
+      },
+      { new: true }
+    ).populate("advices.user", "name profilePicture");
+
+    // Create notification for post owner
+    if (post.author._id.toString() !== userId) {
+      await Notification.create({
+        recipient: post.author._id,
+        sender: userId,
+        type: "advice", // This should now be valid
+        message: "gave you private advice on your post",
+        target: postId,
+        targetModel: "Post",
+      });
+      // Emit real-time notification
+      emitToUser(post.author._id.toString(), "notification", {
+        type: "advice",
+        message: `Someone gave you private advice on your post`,
+        postId: postId,
+      });
+    }
+
+    res.json({
+      message: "Advice added successfully",
+      adviceCount: updatedPost.adviceCount,
+    });
+  } catch (error) {
+    console.error("Error adding advice:", error);
+    res
+      .status(400)
+      .json({ message: "Error adding advice", error: error.message });
+  }
+};
+
+exports.getAdvices = async (req, res) => {
+  try {
+    const postId = req.params.id;
+    const userId = req.user.userId;
+
+    const post = await Post.findById(postId);
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+
+    // Only allow post owner to see advices
+    if (post.author.toString() !== userId) {
+      return res
+        .status(403)
+        .json({ message: "Not authorized to view advices" });
+    }
+
+    const advices = await Post.findById(postId)
+      .select("advices")
+      .populate("advices.user", "name profilePicture");
+
+    res.json({ advices: advices.advices });
+  } catch (error) {
+    console.error("Error fetching advices:", error);
+    res
+      .status(500)
+      .json({ message: "Error fetching advices", error: error.message });
   }
 };

@@ -11,19 +11,23 @@ const {
   getPostById,
   getPostCounts,
   getUserPostStats,
-  getPostComments,getUserPosts,generatePostContent
+  getPostComments,
+  getUserPosts,
+  generatePostContent,
+  addAdvice,
+  getAdvices,
 } = require("../controllers/post_controller");
 
-//get the home page posts 
+//get the home page posts
 router.get("/feed", auth, getFeedPosts);
 
 router.post("/", auth, postUpload.array("images", 5), createPost);
 router.get("/", auth, getAllPosts);
 
 // AI generating
-router.get('/generate', auth, generatePostContent);
-
-// to get a post or view it you might not be sign in
+router.get("/generate", auth, generatePostContent);
+router.post("/:id/advice", auth, addAdvice);
+router.get('/:id/advices', auth, getAdvices);
 router.get("/:id", auth, getPostById);
 router.put("/spark/:id", auth, sparkPost);
 router.post("/comment/:id", auth, addComment);
