@@ -9,7 +9,7 @@ interface Notification {
     profilePicture?: string;
   };
   message: string;
-  type: 'follow' | 'spark' | 'comment' | 'mention';
+  type: 'follow' | 'spark' | 'comment' | 'mention' | 'advice';
   isRead: boolean;
   createdAt: string;
 }

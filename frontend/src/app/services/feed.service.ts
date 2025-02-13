@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, catchError, of } from 'rxjs';
+import { Observable, catchError, of, throwError } from 'rxjs';
 
 export interface Post {
   _id: string;
@@ -17,6 +17,7 @@ export interface Post {
   comments: any[];
   sparkCount: number;
   commentCount: number;
+  adviceCount: number;
   createdAt: string;
 }
 
@@ -144,5 +145,29 @@ export class FeedService {
   // Get post counts (sparks & comments)
   getPostCounts(postId: string): Observable<{ sparkCount: number; commentCount: number }> {
     return this.httpClient.get<{ sparkCount: number; commentCount: number }>(`${this.apiUrl}/${postId}/counts`);
+  }
+  generateAIPostContent(topic: string) {
+    // Ensure the topic is properly encoded in the URL
+    const encodedTopic = encodeURIComponent(topic || 'technology');
+    return this.httpClient.get<{ content: string }>(
+      `${this.apiUrl}/generate?prompt=${encodedTopic}`
+    ).pipe(
+      catchError(error => {
+        console.error('AI Generation Error:', error);
+        return throwError(() => new Error('Failed to generate AI content'));
+      })
+    );
+  }
+
+  addAdvice(postId: string, content: string): Observable<{ adviceCount: number }> {
+    return this.httpClient.post<{ adviceCount: number }>(
+      `${this.apiUrl}/${postId}/advice`, // Remove the extra 'posts' in the URL
+      { content }
+    ).pipe(
+      catchError(error => {
+        console.error('Error adding advice:', error);
+        return throwError(() => new Error('Failed to add advice'));
+      })
+    );
   }
 }

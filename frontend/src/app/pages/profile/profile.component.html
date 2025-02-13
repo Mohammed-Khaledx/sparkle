@@ -76,42 +76,63 @@
     </button>
   </div>
   <!-- Create Post Section (only show on posts tab) -->
-  <div *ngIf="isOwnProfile() && activeTab() === 'posts'" class="create-post">
-    <textarea 
-      [ngModel]="newPost()" 
-      (ngModelChange)="newPost.set($event)"
-      placeholder="What's on your mind?"
-    ></textarea>
+  <div *ngIf="isOwnProfile() && activeTab() === 'posts'" class="post-creator">
+  <!-- Post textarea -->
+  <textarea 
+    [(ngModel)]="newPost" 
+    placeholder="What's on your mind?"
+    class="post-textarea">
+  </textarea>
+  
+  <!-- AI Generator section -->
+  <div class="ai-generator">
+    <input 
+      type="text" 
+      [(ngModel)]="selectedTopic" 
+      placeholder="Enter topic for AI post"
+      class="topic-input"
+    />
+    <button 
+      class="btn btn-secondary" 
+      (click)="generateAIPost()"
+      [disabled]="isGenerating() || !selectedTopic()">
+      <span *ngIf="!isGenerating()">✨ Generate AI Post</span>
+      <span *ngIf="isGenerating()">Generating...</span>
+    </button>
+  </div>
+
+  <!-- Image upload section -->
+  <div class="post-images">
+    <input 
+      type="file" 
+      id="post-images"
+      accept="image/*" 
+      multiple
+      (change)="onPostImagesSelected($event)"
+      #imageInput
+      hidden
+    >
+    <button type="button" class="add-image-btn" (click)="imageInput.click()">
+      📸 Add Images
+    </button>
     
-    <!-- Add image upload input -->
-    <div class="post-images">
-      <input 
-        type="file" 
-        id="post-images"
-        accept="image/*" 
-        multiple
-        (change)="onPostImagesSelected($event)"
-        #imageInput
-        hidden
-      >
-      <button type="button" class="add-image-btn" (click)="imageInput.click()">
-        📸 Add Images
-      </button>
-      
-      <!-- Preview selected images -->
-      <div class="image-previews" *ngIf="selectedPostImages.length > 0">
-        <div class="preview" *ngFor="let image of selectedPostImages">
-          <img [src]="image | safeUrl" alt="Preview">
-        </div>
+    <!-- Preview selected images -->
+    <div class="image-previews" *ngIf="selectedPostImages.length > 0">
+      <div class="preview" *ngFor="let image of selectedPostImages">
+        <img [src]="image | safeUrl" alt="Preview">
       </div>
     </div>
-    
-    <div class="post-actions">
-      <button (click)="createPost()" class="post-btn">
-        Post {{ selectedPostImages.length ? 'with ' + selectedPostImages.length + ' image(s)' : '' }}
-      </button>
-    </div>
   </div>
+  
+  <!-- Post action button -->
+  <div class="post-actions">
+    <button class="btn btn-primary" 
+      (click)="createPost()"
+      [disabled]="!newPost() || isGenerating()">
+      Post {{ selectedPostImages.length ? 'with ' + selectedPostImages.length + ' image(s)' : '' }}
+    </button>
+  </div>
+</div>
 
   <!-- Content sections -->
   <div [ngSwitch]="activeTab()">
@@ -154,6 +175,7 @@
             <button (click)="openComments(post._id)" class="action-btn comment-btn">
               💬 {{ post.commentCount }}
             </button>
+
           </div>
 
           <app-comment 
@@ -161,6 +183,11 @@
             [postId]="post._id"
             (commentCountChanged)="updatePostCommentCount(post._id, $event)">
           </app-comment>
+
+          <app-advice 
+            [postId]="post._id"
+            [authorId]="post.author._id">
+          </app-advice>
         </div>
       </div>
     </div>
