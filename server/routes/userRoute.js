@@ -15,6 +15,7 @@ const {
   register,
   login,
   getCurrentUser,
+  getLoggedUserFollowing,
 } = require("../controllers/auth_controller");
 const auth = require("../middlewares/auth");
 const authAdmin = require("../middlewares/authAdmin");
@@ -25,6 +26,7 @@ user_route.delete("/:id", auth, authAdmin, deleteUser);
 
 // access my profile
 user_route.get("/me", auth, getCurrentUser);
+user_route.get("/following", auth, getLoggedUserFollowing);
 
 // this can be accessed with out auth
 user_route.get("/:id", getUserById);
