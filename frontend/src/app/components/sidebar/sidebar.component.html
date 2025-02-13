@@ -5,9 +5,13 @@
       Feed
     </a>
   </div>
-  
+
   <div class="nav-item">
-    <a routerLink="/notifications" routerLinkActive="active" class="notification-link">
+    <a
+      routerLink="/notifications"
+      routerLinkActive="active"
+      class="notification-link"
+    >
       <span>🔔</span>
       Notifications
       <span class="notification-badge" *ngIf="unreadCount() > 0">
@@ -15,7 +19,14 @@
       </span>
     </a>
   </div>
-  
+
+  <div class="nav-item">
+    <a routerLink="/members" routerLinkActive="active">
+      <span>👥</span>
+      Members
+    </a>
+  </div>
+
   <div class="nav-item">
     <a routerLink="/messages" routerLinkActive="active" class="message-link">
       <span>💬</span>
@@ -25,7 +36,7 @@
       </span>
     </a>
   </div>
-  
+
   <div class="nav-item">
     <a routerLink="/profile" routerLinkActive="active">
       <span>👤</span>
