@@ -1,0 +1,12 @@
+<!-- Show navbar always -->
+<app-navbar />
+
+<div class="page-layout">
+  <!-- Only show sidebar if not on auth pages -->
+  <app-sidebar />
+
+  <!-- Main content area with dynamic classes -->
+  <main>
+    <router-outlet />
+  </main>
+</div>

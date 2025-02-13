@@ -1,12 +1,5 @@
-<!-- Show navbar always -->
-<app-navbar></app-navbar>
-
-<div class="page-layout">
-  <!-- Only show sidebar if not on auth pages -->
-  <app-sidebar *ngIf="showSidebar()"></app-sidebar>
-  
-  <!-- Main content area with dynamic classes -->
-  <main [ngClass]="mainContentClass()">
-    <router-outlet></router-outlet>
-  </main>
-</div>
+@if (this.authLayout) {
+  <app-auth-layout />
+} @else {
+  <app-layout />
+}

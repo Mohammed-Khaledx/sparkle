@@ -18,7 +18,7 @@ export class AuthService {
   // set
   private authState = new BehaviorSubject<boolean>(
     // Check if token exists
-    !!localStorage.getItem('token')
+    !!localStorage.getItem('token'),
   );
   isAuthenticated$ = this.authState.asObservable(); // Expose as observable
 
@@ -35,13 +35,13 @@ export class AuthService {
         tap((result) => {
           this.authState.next(true);
           localStorage.setItem('token', result.token);
-        })
+        }),
       );
   }
 
   logout() {
     localStorage.removeItem('token');
-    this.router.navigate(['/signin']); // Redirect to login after logout
+    this.router.navigate(['/auth/signin']); // Redirect to login after logout
     this.authState.next(false);
   }
 
