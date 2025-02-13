@@ -2,7 +2,70 @@
   <!-- Main Content -->
   <main class="main-content">
     <div class="feed-container">
-      <h2>Your Feed</h2>
+
+      <!-- Create Post Card -->
+      <div class="create-post-card">
+        <div class="post-creator">
+          <!-- Post textarea -->
+          <textarea 
+            [ngModel]="newPost()"
+            (ngModelChange)="newPost.set($event)"
+            placeholder="What's on your mind?"
+            class="post-textarea">
+          </textarea>
+          
+          <!-- AI Generator section -->
+          <div class="ai-generator">
+            <input 
+              type="text" 
+              [ngModel]="selectedTopic()"
+              (ngModelChange)="selectedTopic.set($event)"
+              placeholder="✨ Try AI: Enter a topic..."
+              class="topic-input"
+            />
+            <button 
+              class="btn-ai" 
+              (click)="generateAIPost()"
+              [disabled]="isGenerating() || !selectedTopic()">
+              <span class="ai-icon">🪄</span>
+              <span>{{ isGenerating() ? 'Generating...' : 'Generate with AI' }}</span>
+            </button>
+          </div>
+
+          <!-- Image upload section -->
+          <div class="post-actions">
+            <div class="action-left">
+              <input 
+                type="file" 
+                id="post-images"
+                accept="image/*" 
+                multiple
+                (change)="onPostImagesSelected($event)"
+                #imageInput
+                hidden
+              >
+              <button type="button" class="btn-upload" (click)="imageInput.click()">
+                <span>📸</span>
+                <span>Add Images</span>
+              </button>
+            </div>
+            
+            <button class="btn-post" 
+              (click)="createPost()"
+              [disabled]="!newPost() || isGenerating()">
+              Post {{ selectedPostImages.length ? '(' + selectedPostImages.length + ')' : '' }}
+            </button>
+          </div>
+          
+          <!-- Image previews -->
+          <div class="image-previews" *ngIf="selectedPostImages.length > 0">
+            <div class="preview" *ngFor="let image of selectedPostImages">
+              <img [src]="image" alt="Preview">
+              <button class="remove-image" (click)="removeImage(image)">×</button>
+            </div>
+          </div>
+        </div>
+      </div>
 
       <div class="posts-list">
         <div class="post-card" *ngFor="let post of posts()">
