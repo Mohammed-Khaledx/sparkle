@@ -57,17 +57,29 @@ let createUser = async (req, res) => {
 
 // READ
 let getAllUsers = async (req, res) => {
-  const { limit } = req.query;
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 12;
+  const skip = (page - 1) * limit;
+
   try {
     const users = await User.find()
       .select("-password -__v")
-      .limit(limit ?? 50)
+      .skip(skip)
+      .limit(limit)
       .lean();
-    res.json(users);
+
+    const total = await User.countDocuments();
+    
+    res.json({
+      users,
+      currentPage: page,
+      totalPages: Math.ceil(total / limit),
+      totalUsers: total
+    });
   } catch (error) {
     res.status(500).json({
       message: "Error fetching users",
-      error: error.message,
+      error: error.message
     });
   }
 };

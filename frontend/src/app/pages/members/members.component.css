@@ -1,8 +1,8 @@
 section {
   width: 100%;
-  max-width: 1024px;
-  margin: 10px auto;
-  padding: 40px 30px;
+  max-width: 1200px;
+  margin: 2rem auto;
+  padding: 2rem;
   border-radius: 12px;
   background: var(--background-secondary);
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
@@ -12,15 +12,22 @@ h1 {
   width: calc(100% - 20px);
   margin: auto;
   padding-bottom: 20px;
-  margin-bottom: 10px;
+  margin-bottom: 2rem;
   border-bottom: 2px solid #eee;
-  /* margin-bottom: 32px; */
+  color: var(--text-primary);
+  font-size: 2rem;
   font-weight: 600;
 }
 
 .members {
   display: flex;
   flex-wrap: wrap;
+}
+
+.members-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 2rem;
 }
 
 .item {
@@ -42,19 +49,55 @@ h1 {
   overflow: hidden;
 }
 
+.member-card {
+  background: var(--background-secondary);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.member-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+}
+
+.member-content {
+  position: relative;
+  padding: 1.5rem;
+  text-align: center;
+}
+
 .bg {
   position: absolute;
   top: 0;
   left: 0;
   background: linear-gradient(135deg, #0ea5e938 0%, #2563eb3d 100%);
-  /* background: var(--gradient-blue); */
   width: 100%;
   height: 122px;
 }
 
+.profile-banner {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 100px;
+  background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary-color) 100%);
+  margin: -1.5rem -1.5rem 0;
+}
+
 .profile-image {
   position: relative;
-  width: 100%;
+  width: 120px;
+  height: 120px;
+  margin: 40px auto 1.5rem;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 4px solid var(--background-secondary);
+  box-shadow: var(--shadow-md);
 }
 
 img {
@@ -64,9 +107,34 @@ img {
   border-radius: 100%;
 }
 
+.profile-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.profile-image:hover img {
+  transform: scale(1.1);
+}
+
+h2 {
+  color: var(--text-primary);
+  font-size: 1.5rem;
+  margin: 1rem 0 0.5rem;
+  font-weight: 600;
+}
+
 .bio {
-  color: #666;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
   line-height: 1.6;
+  margin-bottom: 1.5rem;
+  min-height: 3.2rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 button {
@@ -83,4 +151,69 @@ button {
 button.follow {
   background: var(--gradient-blue);
   color: white;
+}
+
+.follow-btn {
+  width: 100%;
+  padding: 1rem;
+  border: none;
+  background: var(--primary-color);
+  color: white;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.follow-btn.following {
+  background: var(--background-tertiary);
+  color: var(--text-primary);
+}
+
+.follow-btn:hover:not(.following) {
+  background: var(--primary-hover);
+}
+
+.follow-btn.following:hover {
+  background: var(--red-500);
+  color: white;
+}
+
+.load-more-btn {
+  display: block;
+  margin: 3rem auto 1rem;
+  padding: 1rem 2rem;
+  background: var(--background-secondary);
+  color: var(--text-primary);
+  border: none;
+  border-radius: var(--radius-full);
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.load-more-btn:hover:not(:disabled) {
+  background: var(--background-tertiary);
+  transform: translateY(-2px);
+}
+
+.load-more-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+  section {
+    padding: 1rem;
+  }
+  
+  .members-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .profile-image {
+    width: 100px;
+    height: 100px;
+  }
 }

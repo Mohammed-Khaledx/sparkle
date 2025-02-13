@@ -18,6 +18,11 @@ export const routes: Routes = [
     canActivate: [authGuard],
   },
   {
+    path: 'members',
+    component: MembersComponent,
+    canActivate: [authGuard]
+  },
+  {
     path: 'messages',
     component: MessageComponent,
     canActivate: [authGuard],

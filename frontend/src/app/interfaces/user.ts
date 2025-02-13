@@ -4,6 +4,7 @@ export interface User {
     url: string;
   };
   name: string;
+  bio:string;
   email: string;
   isAdmin: string;
   createdAt: string;

@@ -9,11 +9,13 @@ import { Follows } from '../interfaces/follows';
   providedIn: 'root',
 })
 export class UserService {
-  private http = inject(HttpClient);
+  private apiUrl = 'http://localhost:3000/users';
 
-  getUsers(limit?: number): Observable<User[]> {
-    return this.http.get<User[]>(
-      environment.apiUrl + '/users' + (limit ? `?limit=${limit}` : ''),
+  constructor(private http: HttpClient) {}
+
+  getUsers(page: number = 1, limit: number = 12) {
+    return this.http.get<{ users: User[], totalPages: number }>(
+      `${this.apiUrl}?page=${page}&limit=${limit}`
     );
   }
 

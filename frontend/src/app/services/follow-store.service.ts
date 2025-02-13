@@ -1,20 +1,16 @@
 import { Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-
-export interface User {
-  _id: string;
-  name: string;
-  profilePicture?: { url: string };
-}
+import { Observable } from 'rxjs';
+import { User } from '../interfaces/user';
 
 @Injectable({ providedIn: 'root' })
 export class FollowStoreService {
-  // Signals to hold the state
   followers = signal<User[]>([]);
   following = signal<User[]>([]);
+  loading = signal(false);
   followStatus = signal<Map<string, boolean>>(new Map());
 
-   constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) {}
 
   loadFollowers(userId: string): void {
     if (!userId) return;
@@ -23,7 +19,6 @@ export class FollowStoreService {
         next: (response) => {
           const followers = response.data.map(f => f.follower);
           this.followers.set(followers);
-          // Optionally, check follow status for each follower if needed
         },
         error: (err) => {
           console.error('Error loading followers:', err);
@@ -39,7 +34,6 @@ export class FollowStoreService {
         next: (response) => {
           const following = response.data.map(f => f.following);
           this.following.set(following);
-          // Mark these users as followed in the followStatus map
           following.forEach(user => this.updateFollowStatus(user._id, true));
         },
         error: (err) => {
@@ -49,7 +43,7 @@ export class FollowStoreService {
       });
   }
 
-  toggleFollow(userId: string, currentStatus: boolean) {
+  toggleFollow(userId: string, currentStatus: boolean): Observable<any> {
     const action = currentStatus ? 'unfollow' : 'follow';
     return this.http.post(`http://localhost:3000/followOrUnfollow/${userId}/${action}`, {});
   }
@@ -60,5 +54,21 @@ export class FollowStoreService {
       newMap.set(userId, isFollowing);
       return newMap;
     });
+  }
+
+  isFollowing(userId: string): boolean {
+    return this.followStatus().get(userId) || false;
+  }
+
+  getCurrentUserId(): string {
+    const token = localStorage.getItem('token');
+    if (!token) return '';
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      return payload.userId;
+    } catch (e) {
+      console.error('Error decoding token:', e);
+      return '';
+    }
   }
 }
