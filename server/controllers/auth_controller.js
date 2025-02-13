@@ -1,25 +1,24 @@
 const User = require("../models/user_model");
 const jwt = require("jsonwebtoken");
-console.log('Secret Key:', process.env.JWT_SECRET); // Ensure it is not undefined
+const Follow = require("../models/follow_model");
+console.log("Secret Key:", process.env.JWT_SECRET); // Ensure it is not undefined
 // Generate JWT Token
-const generateToken = (userId ,isAdmin) => {
+const generateToken = (userId, isAdmin) => {
   try {
-    
-    return jwt.sign({ userId , isAdmin}, process.env.JWT_SECRET, {
-      expiresIn: "30d",// 30 daysfor testing purpose
+    return jwt.sign({ userId, isAdmin }, process.env.JWT_SECRET, {
+      expiresIn: "30d", // 30 daysfor testing purpose
     });
   } catch (error) {
-    console.error('Token generation error:', error);
+    console.error("Token generation error:", error);
 
-    throw new Error('Token generation failed');
-
+    throw new Error("Token generation failed");
   }
 };
 
 // Register User
 exports.register = async (req, res) => {
   try {
-    const { name, email, password ,isAdmin} = req.body;
+    const { name, email, password, isAdmin } = req.body;
 
     // Check if user already exists
     let existingUser = await User.findOne({
@@ -44,15 +43,13 @@ exports.register = async (req, res) => {
     // saving the path of the image file
     if (req.file) {
       user.profilePicture = { url: req.file.path }; // Store the file path
-      console.log('File path:', req.file.path);
+      console.log("File path:", req.file.path);
     }
 
     await user.save();
 
-
-
     // Generate token
-    const token = generateToken(user._id , user.isAdmin);
+    const token = generateToken(user._id, user.isAdmin);
 
     res.status(201).json({
       message: "User registered successfully",
@@ -66,8 +63,6 @@ exports.register = async (req, res) => {
     });
   }
 };
-
-
 
 // Login User
 exports.login = async (req, res) => {
@@ -87,7 +82,7 @@ exports.login = async (req, res) => {
     }
 
     // Generate token
-    const token = generateToken(user._id , user.isAdmin);
+    const token = generateToken(user._id, user.isAdmin);
 
     res.json({
       message: "Login successful",
@@ -102,17 +97,23 @@ exports.login = async (req, res) => {
   }
 };
 
-
 // Get current user
 exports.getCurrentUser = async (req, res) => {
   try {
-      // extract id from te auth middelware which mean token
-      const user = await User.findById(req.user.userId).select('-password');
-      if (!user) {
-        return res.status(404).json({ message: "User not found." });
-      }
-      res.json(user);
+    // extract id from te auth middelware which mean token
+    const user = await User.findById(req.user.userId).select("-password");
+    if (!user) {
+      return res.status(404).json({ message: "User not found." });
+    }
+    res.json(user);
   } catch (error) {
-      res.status(500).json({ message: 'Error getting user', error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error getting user", error: error.message });
   }
+};
+
+exports.getLoggedUserFollowing = async (req, res) => {
+  const following = await Follow.find({ follower: req.user.userId });
+  res.json(following);
 };
