@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { FeedService ,Post} from '../../services/feed.service';
 import { CommentComponent } from '../../components/comment/comment.component';
 import { NotificationService } from '../../services/notification.service';
+import { FormsModule, NgModel } from '@angular/forms';
 
 @Component({
   selector: 'app-feed',
   standalone: true,
-  imports: [CommonModule , CommentComponent],
+  imports: [CommonModule , CommentComponent,FormsModule],
   templateUrl: './feed.component.html',
   styleUrl: './feed.component.css',
 })
@@ -22,6 +23,10 @@ export class FeedComponent implements OnInit {
   currentPage = 1;
   loading = signal(false);
   hasMore = signal(true); // Track if more posts are available
+
+  showAdviceDialog = signal(false);
+  selectedPostForAdvice = signal<string | null>(null);
+  newAdvice = signal('');
 
   ngOnInit() {
     this.loadFeed();
@@ -138,5 +143,47 @@ export class FeedComponent implements OnInit {
       console.error('Error decoding token:', e);
       return null;
     }
+  }
+
+  openAdviceDialog(postId: string) {
+    this.selectedPostForAdvice.set(postId);
+    this.showAdviceDialog.set(true);
+  }
+  closeAdviceDialog() {
+    this.showAdviceDialog.set(false);
+    this.newAdvice.set('');
+  }
+
+  submitAdvice() {
+    if (!this.newAdvice().trim() || !this.selectedPostForAdvice()) return;
+
+    this.feedService.addAdvice(
+      this.selectedPostForAdvice()!, 
+      this.newAdvice()
+    ).subscribe({
+      next: (response) => {
+        // Update posts signal instead of userPosts
+        this.posts.update(posts =>
+          posts.map(post =>
+            post._id === this.selectedPostForAdvice()
+              ? { ...post, adviceCount: response.adviceCount }
+              : post
+          )
+        );
+        this.showAdviceDialog.set(false);
+        this.newAdvice.set('');
+        this.selectedPostForAdvice.set(null);
+      },
+      error: (err) => {
+        console.error('Error adding advice:', err);
+        // Optionally show an error message to the user
+      }
+    });
+  }
+
+  // Add method to check if current user is post author
+  isPostAuthor(post: Post): boolean {
+    const userId = this.getUserIdFromToken();
+    return post.author._id === userId;
   }
 }

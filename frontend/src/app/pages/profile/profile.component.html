@@ -175,6 +175,7 @@
             <button (click)="openComments(post._id)" class="action-btn comment-btn">
               💬 {{ post.commentCount }}
             </button>
+
           </div>
 
           <app-comment 
@@ -182,6 +183,11 @@
             [postId]="post._id"
             (commentCountChanged)="updatePostCommentCount(post._id, $event)">
           </app-comment>
+
+          <app-advice 
+            [postId]="post._id"
+            [authorId]="post.author._id">
+          </app-advice>
         </div>
       </div>
     </div>

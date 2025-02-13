@@ -7,6 +7,7 @@ import { CommentComponent } from '../../components/comment/comment.component';
 import { HttpClient } from '@angular/common/http';
 import { SafeUrlPipe } from '../../pipes/safe-url.pipe';
 import { FollowStoreService } from '../../services/follow-store.service';
+import { AdviceComponent } from '../../components/advice/advice.component';
 
 
 interface User {
@@ -31,7 +32,7 @@ interface UserProfile {
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule, FormsModule, CommentComponent,SafeUrlPipe],
+  imports: [CommonModule, FormsModule, CommentComponent,SafeUrlPipe,AdviceComponent],
   templateUrl: './profile.component.html',
   styleUrls: ['./profile.component.css']
 })

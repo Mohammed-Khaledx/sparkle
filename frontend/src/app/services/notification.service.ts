@@ -10,8 +10,9 @@ interface NotificationData {
     name: string;
     profilePicture?: string;
   };
-  type: 'follow' | 'spark' | 'comment' | 'mention';
+  type: 'follow' | 'spark' | 'comment' | 'mention' | 'advice'; // Add 'advice' type
   message: string;
+  target:string;
   isRead: boolean;
   createdAt: string;
 }
@@ -20,11 +21,11 @@ interface NotificationData {
   providedIn: 'root'
 })
 export class NotificationService {
-  private unreadCount = signal(0);
-  private http = inject(HttpClient);
-  private apiUrl = 'http://localhost:3000/notifications';
-  private notificationSubject = new Subject<NotificationData>();
   private socket: Socket;
+  private notificationSubject = new Subject<NotificationData>();
+  private apiUrl = 'http://localhost:3000/notifications';
+  unreadCount = signal<number>(0);
+  private http = inject(HttpClient)
 
   constructor() {
     this.socket = io('http://localhost:3000', {
@@ -37,6 +38,11 @@ export class NotificationService {
 
   private initializeSocketListeners() {
     this.socket.on('notification', (data: NotificationData) => {
+      // Handle advice notifications specifically
+      if (data.type === 'advice') {
+        // You might want to show a special toast or alert for advice
+        console.log('New advice received:', data);
+      }
       this.notificationSubject.next(data);
       this.unreadCount.update(count => count + 1);
     });

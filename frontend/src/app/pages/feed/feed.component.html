@@ -35,17 +35,29 @@
 
           <!-- Post Actions -->
           <div class="post-actions">
-            <button (click)="toggleSpark(post._id)" 
-                    [class.sparked]="hasSparked(post._id)"
-                    class="action-btn spark-btn">
+            <button 
+              (click)="toggleSpark(post._id)" 
+              [class.sparked]="hasSparked(post._id)"
+              class="action-btn spark-btn">
               <span class="icon">⚡</span>
               <span class="count">{{ postCounts()[post._id] || post.sparkCount || 0 }}</span>
             </button>
             
-            <button (click)="openComments(post._id)" 
-                    class="action-btn comment-btn">
+            <button 
+              (click)="openComments(post._id)" 
+              class="action-btn comment-btn">
               <span class="icon">💬</span>
               <span class="count">{{ post.commentCount }}</span>
+            </button>
+
+            <!-- Show advice button only on others' posts -->
+            <button 
+              *ngIf="!isPostAuthor(post)"
+              (click)="openAdviceDialog(post._id)"
+              class="action-btn advice-btn"
+              title="Give private advice">
+              <span class="icon">🤔</span>
+              <span class="count">{{ post.adviceCount || 0 }}</span>
             </button>
           </div>
 
@@ -64,5 +76,30 @@
               class="load-more">
         {{ loading() ? 'Loading...' : 'Load More' }}
       </button>
+    </div>
+
+    <!-- Single Advice Dialog (outside the posts loop) -->
+    <div *ngIf="showAdviceDialog()" class="advice-dialog-overlay">
+      <div class="advice-dialog">
+        <h3>Give Advice</h3>
+        <textarea
+          [(ngModel)]="newAdvice"
+          placeholder="Write your advice..."
+          class="advice-input">
+        </textarea>
+        <div class="dialog-actions">
+          <button 
+            (click)="submitAdvice()"
+            [disabled]="!newAdvice().trim()"
+            class="btn btn-primary">
+            Send Advice
+          </button>
+          <button 
+            (click)="closeAdviceDialog()"
+            class="btn btn-secondary">
+            Cancel
+          </button>
+        </div>
+      </div>
     </div>
   </main>

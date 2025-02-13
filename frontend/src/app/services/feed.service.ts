@@ -17,6 +17,7 @@ export interface Post {
   comments: any[];
   sparkCount: number;
   commentCount: number;
+  adviceCount: number;
   createdAt: string;
 }
 
@@ -154,6 +155,18 @@ export class FeedService {
       catchError(error => {
         console.error('AI Generation Error:', error);
         return throwError(() => new Error('Failed to generate AI content'));
+      })
+    );
+  }
+
+  addAdvice(postId: string, content: string): Observable<{ adviceCount: number }> {
+    return this.httpClient.post<{ adviceCount: number }>(
+      `${this.apiUrl}/${postId}/advice`, // Remove the extra 'posts' in the URL
+      { content }
+    ).pipe(
+      catchError(error => {
+        console.error('Error adding advice:', error);
+        return throwError(() => new Error('Failed to add advice'));
       })
     );
   }

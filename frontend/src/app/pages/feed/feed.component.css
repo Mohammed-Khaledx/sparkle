@@ -208,3 +208,128 @@ app-comment {
     transform: translateY(0);
   }
 }
+
+/* Advice Button Styles */
+.advice-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: 24px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.95rem;
+  background: var(--background-tertiary);
+  color: var(--text-primary);
+}
+
+.advice-btn:hover {
+  background: var(--primary-light);
+  transform: translateY(-1px);
+}
+
+.advice-dialog-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.advice-dialog {
+  background: var(--background-primary);
+  padding: 2rem;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  width: 90%;
+  max-width: 500px;
+  animation: slideIn 0.3s ease-out;
+}
+
+.advice-dialog h3 {
+  color: var(--text-primary);
+  margin-bottom: 1rem;
+  font-size: 1.25rem;
+}
+
+.advice-input {
+  width: 100%;
+  min-height: 120px;
+  padding: 1rem;
+  margin: 1rem 0;
+  background: var(--background-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  resize: vertical;
+  font-size: 1rem;
+}
+
+.advice-input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px var(--primary-light);
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.dialog-actions button {
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius-full);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.dialog-actions .btn-primary {
+  background: var(--primary-color);
+  color: white;
+  border: none;
+}
+
+.dialog-actions .btn-secondary {
+  background: var(--background-tertiary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+}
+
+.dialog-actions button:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.dialog-actions button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
