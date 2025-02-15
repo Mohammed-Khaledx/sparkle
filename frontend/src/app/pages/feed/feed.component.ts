@@ -28,6 +28,11 @@ export class FeedComponent implements OnInit {
   selectedPostForAdvice = signal<string | null>(null);
   newAdvice = signal('');
 
+  newPost = signal('');
+  selectedTopic = signal('');
+  isGenerating = signal(false);
+  selectedPostImages: File[] = [];
+
   ngOnInit() {
     this.loadFeed();
   }
@@ -185,5 +190,49 @@ export class FeedComponent implements OnInit {
   isPostAuthor(post: Post): boolean {
     const userId = this.getUserIdFromToken();
     return post.author._id === userId;
+  }
+
+  // Add methods for handling post creation
+  onPostImagesSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (input.files) {
+      this.selectedPostImages = Array.from(input.files);
+    }
+  }
+
+  removeImage(image: File) {
+    this.selectedPostImages = this.selectedPostImages.filter(img => img !== image);
+  }
+
+  generateAIPost() {
+    if (!this.selectedTopic().trim()) return;
+    
+    this.isGenerating.set(true);
+    this.feedService.generateAIPostContent(this.selectedTopic()).subscribe({
+      next: (response) => {
+        this.newPost.set(response.content);
+        this.isGenerating.set(false);
+        this.selectedTopic.set('');
+      },
+      error: (err) => {
+        console.error('Error generating AI post:', err);
+        this.isGenerating.set(false);
+      }
+    });
+  }
+
+  createPost() {
+    if (!this.newPost().trim()) return;
+
+    this.feedService.createPost(this.newPost(), this.selectedPostImages).subscribe({
+      next: (post) => {
+        this.posts.update(posts => [post, ...posts]);
+        this.newPost.set('');
+        this.selectedPostImages = [];
+        const fileInput = document.getElementById('post-images') as HTMLInputElement;
+        if (fileInput) fileInput.value = '';
+      },
+      error: (err) => console.error('Error creating post:', err)
+    });
   }
 }

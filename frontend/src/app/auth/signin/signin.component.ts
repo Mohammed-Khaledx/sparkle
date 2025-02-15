@@ -37,7 +37,7 @@ export class SigninComponent {
           if (this.authService.isLoggedIn()) {
             // should navigate to admin if isAdmin == true
             // and if not navigate to home page
-            this.router.navigate(['/feed']); // Redirect to feed after login
+            this.router.navigate(['/profile']); // Redirect to feed after login
           }
 
           console.log(data);

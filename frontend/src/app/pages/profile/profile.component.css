@@ -3,9 +3,9 @@
   max-width: 1000px;
   margin: 0 auto;
   padding: 2rem;
-  background: #f9fafb;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  background: var(--background-secondary);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
 }
 
 /* Modern Profile Header */
@@ -13,16 +13,22 @@
   display: flex;
   flex-wrap: wrap;
   gap: 2rem;
-  background: linear-gradient(135deg, #edf2f7, #ffffff);
-  border-radius: 12px;
+  background: linear-gradient(
+    to bottom right,
+    var(--background-tertiary),
+    var(--background-secondary)
+  );
+  border-radius: var(--radius-lg);
   padding: 2rem;
   margin-bottom: 2rem;
+  border: 1px solid var(--border-color);
 }
 
 .profile-info {
   display: grid;
   grid-template-columns: auto 1fr;
   gap: 32px;
+  width: 100%;
 }
 
 /* Profile Picture Styles */
@@ -37,8 +43,8 @@
   height: 100%;
   border-radius: 50%;
   object-fit: cover;
-  border: 4px solid #fff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 4px solid var(--background-secondary);
+  box-shadow: var(--shadow-md);
 }
 
 .edit-picture-btn {
@@ -50,14 +56,16 @@
   color: white;
   border: none;
   padding: 8px 16px;
-  border-radius: 20px;
+  border-radius: var(--radius-full);
   cursor: pointer;
   font-size: 0.9rem;
   transition: all 0.2s ease;
+  backdrop-filter: blur(4px);
 }
 
 .edit-picture-btn:hover {
   background: rgba(0, 0, 0, 0.8);
+  transform: translateX(-50%) translateY(-2px);
 }
 
 /* User Info Styles */
@@ -70,12 +78,13 @@
 .user-details h2 {
   margin: 0;
   font-size: 1.8rem;
-  color: #2c3e50;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
 }
 
 .bio {
   margin: 12px 0;
-  color: #666;
+  color: var(--text-secondary);
   line-height: 1.6;
 }
 
@@ -90,6 +99,15 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  padding: 0.75rem 1.5rem;
+  background: var(--background-tertiary);
+  border-radius: var(--radius-lg);
+  transition: all 0.2s ease;
+}
+
+.stat-item:hover {
+  transform: translateY(-2px);
+  background: var(--background-hover);
 }
 
 .stat-value {
@@ -237,10 +255,9 @@
 
 /* Posts Section */
 .posts-section {
-  background: white;
-  border-radius: 16px;
-  padding: 24px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  background: var(--background-secondary);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
 }
 
 .posts-grid {
@@ -250,10 +267,17 @@
 }
 
 .post-card {
-  padding: 20px;
-  border-bottom: 1px solid #eee;
-  background: var(--background-secondary);
-  color: var(--text-primary);
+  background: var(--background-tertiary);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  border: 1px solid var(--border-color);
+  transition: all 0.2s ease;
+}
+
+.post-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
 }
 
 .post-header {
@@ -405,27 +429,28 @@
   justify-content: center;
   gap: 1rem;
   margin-bottom: 2rem;
-  padding: 1rem 0;
-  border-bottom: 1px solid #e2e8f0;
+  padding: 1rem;
+  background: var(--background-tertiary);
+  border-radius: var(--radius-full);
 }
 
 .tab-btn {
-  background: none;
+  background: transparent;
   border: none;
   padding: 0.75rem 1.5rem;
   font-size: 1rem;
-  color: #4a5568;
+  color: var(--text-secondary);
   cursor: pointer;
-  border-radius: 6px;
-  transition: background 0.3s ease, color 0.3s ease, transform 0.3s ease;
+  border-radius: var(--radius-full);
+  transition: all 0.3s ease;
 }
 
 .tab-btn.active,
 .tab-btn:hover {
-  color: #2d3748;
-  background: #e2e8f0;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+  color: white;
+  background: var(--gradient-blue);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
 }
 
 /* Users Grid */
@@ -581,6 +606,32 @@
   border-color: var(--background-tertiary);
 }
 
+[data-theme="dark"] {
+  .profile-container,
+  .profile-header,
+  .posts-section {
+    background: var(--background-secondary);
+    border: 1px solid var(--border-color);
+  }
+
+  .stat-item {
+    background: var(--background-tertiary);
+  }
+
+  .post-card {
+    background: var(--background-tertiary);
+    border: 1px solid var(--border-color);
+  }
+
+  .tab-btn:not(.active) {
+    color: var(--text-secondary);
+  }
+
+  .profile-picture-container img {
+    border-color: var(--background-tertiary);
+  }
+}
+
 /* Responsive Adjustments */
 @media (max-width: 768px) {
   .users-grid {
@@ -605,6 +656,18 @@
   .profile-header {
     flex-direction: column;
     align-items: center;
+    padding: 1.5rem;
+  }
+  .profile-info {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+  .stats-container {
+    justify-content: center;
+  }
+  .profile-picture-container {
+    width: 140px;
+    height: 140px;
   }
 }
 
