@@ -33,14 +33,14 @@ exports.followUser = async (req, res) => {
     const user = await User.findById(userId);
 
     // Create a notification
-    await Notification.create({
-      recipient: followId,
-      sender: userId,
-      type: "follow",
-      message: "started following you.",
-      target: null,
-      targetModel: null,
-    });
+    // await Notification.create({
+    //   recipient: followId,
+    //   sender: userId,
+    //   type: "follow",
+    //   message: "started following you.",
+    //   target: null,
+    //   targetModel: null,
+    // });
 
     // Send notification in real-time if recipient is online
     // As active users is {userid : user-socketid} and carry all currently connected
